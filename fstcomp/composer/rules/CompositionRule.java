@@ -4,8 +4,7 @@ import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
 import de.ovgu.cide.fstgen.ast.FSTTerminal;
 
 /**
- * 
- * @author Hendrik Speidel <speidel@fim.uni-passau.de>
+ * controls how FSTTerminal nodes are merged
  *
  */
 public interface CompositionRule {

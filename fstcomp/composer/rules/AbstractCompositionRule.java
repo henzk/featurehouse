@@ -4,10 +4,7 @@ import de.ovgu.cide.fstgen.ast.FSTTerminal;
 
 /**
  * 
- * @author Hendrik Speidel <speidel@fim.uni-passau.de>
- *
- *
- * Helper class that already implements getRuleName
+ * Helper class that already implements getRuleName, preCompose, and postCompose
  *
  */
 abstract public class AbstractCompositionRule implements CompositionRule {
