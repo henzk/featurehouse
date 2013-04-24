@@ -46,7 +46,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 	protected CmdLineInterpreter cmd = new CmdLineInterpreter();
 	
 	protected CompositionMetadataStore meta = CompositionMetadataStore.getInstance();
-	protected List<CompositionRule> compositionRules;
+	protected CompositionRuleset compositionRules;
 	protected CRuntimeSubtreeIntegration subtreeRewriterC = null;
 	protected JavaRuntimeSubtreeIntegration subtreeRewriterJava = null;
 	
@@ -78,7 +78,41 @@ public class FSTGenComposer extends FSTGenProcessor {
 		}
 	}
 	
-
+	private void setupCompositionRuleset() {
+		compositionRules = new CompositionRuleset();
+		
+		//default rules
+		compositionRules
+			.addRule(new Replacement())
+			.addRule(new JavaMethodOverriding())
+			.addRule(new ContractComposition(cmd.contract_style))
+			.addRule(new StringConcatenation())
+			.addRule(new ImplementsListMerging())
+			.addRule(new CSharpMethodOverriding())
+			.addRule(new ConstructorConcatenation())
+			.addRule(new ModifierListSpecialization())
+			.addRule(new FieldOverriding())
+			.addRule(new ExpansionOverriding())
+			.addRule(new CompositionError());
+		
+		//variability encoding uses special rules
+		if (cmd.lifting) {
+			if (cmd.lifting_language.equals("c")) { 
+				compositionRules
+					.addRule(new CRuntimeReplacement())
+					.addRule(new CRuntimeFunctionRefinement());			
+				subtreeRewriterC = new CRuntimeSubtreeIntegration();
+			} else if (cmd.lifting_language.equals("java")) {
+				compositionRules
+					.addRule(new JavaRuntimeReplacement())
+					.addRule(new JavaRuntimeFunctionRefinement());
+				subtreeRewriterJava = new JavaRuntimeSubtreeIntegration();
+			} else {
+				throw new InternalError("lifting language \"" + cmd.lifting_language + "\" is not implemented.");
+			}
+		}
+	}
+	
 	public void run(String[] args) {
 		meta.clearFeatures();
 		cmd.parseCmdLineArguments(args);
@@ -86,32 +120,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		JavaRuntimeFunctionRefinement.setFeatureAnnotation(cmd.featureAnnotation);
 		
 		//select the composition rules
-		compositionRules = new ArrayList<CompositionRule>();
-		if (cmd.lifting) {
-			if (cmd.lifting_language.equals("c")) { 
-				compositionRules.add(new CRuntimeReplacement());
-				compositionRules.add(new CRuntimeFunctionRefinement());			
-				subtreeRewriterC = new CRuntimeSubtreeIntegration();
-			} else if (cmd.lifting_language.equals("java")) {
-				compositionRules.add(new JavaRuntimeReplacement());
-				compositionRules.add(new JavaRuntimeFunctionRefinement());
-				subtreeRewriterJava = new JavaRuntimeSubtreeIntegration();
-			} else {
-				throw new InternalError("lifting language \"" + cmd.lifting_language + "\" is not implemented.");
-			}
-		} else {
-			compositionRules.add(new Replacement());
-			compositionRules.add(new JavaMethodOverriding());
-			compositionRules.add(new ContractComposition(cmd.contract_style));
-		}
-		compositionRules.add(new StringConcatenation());
-		compositionRules.add(new ImplementsListMerging());
-		compositionRules.add(new CSharpMethodOverriding());
-		compositionRules.add(new ConstructorConcatenation());
-		compositionRules.add(new ModifierListSpecialization());
-		compositionRules.add(new FieldOverriding());
-		compositionRules.add(new ExpansionOverriding());
-		compositionRules.add(new CompositionError());
+		setupCompositionRuleset();
 		
 		try {
 			try {
@@ -354,12 +363,8 @@ public class FSTGenComposer extends FSTGenProcessor {
 
 				CompositionRule applicableRule = null;
 				//get applicable rule from compositionRules
-				for (CompositionRule rule: compositionRules) {
-					if (terminalA.getCompositionMechanism().equals(rule.getRuleName())) {						
-						 applicableRule = rule;
-						 break;
-					}
-				}
+				applicableRule = compositionRules.getRule(terminalA.getCompositionMechanism());
+
 				if (applicableRule != null) {
 					//apply composition rule
 					applicableRule.compose(terminalA, terminalB, terminalComp, nonterminalParent);
