@@ -78,7 +78,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		}
 	}
 	
-	private void setupCompositionRuleset() {
+	protected void setupCompositionRuleset() {
 		compositionRules = new CompositionRuleset();
 		
 		//default rules

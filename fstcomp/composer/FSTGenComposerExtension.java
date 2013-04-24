@@ -64,34 +64,16 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 	private void build(String[] args, String[] featuresArg, boolean compose) {
 		meta.clearFeatures();
 		cmd.parseCmdLineArguments(args);
-		//select the composition rules
-		compositionRules = new ArrayList<CompositionRule>();
-		if (cmd.lifting) {
-			if (cmd.lifting_language.equals("c")) { 
-				compositionRules.add(new CRuntimeReplacement());
-				compositionRules.add(new CRuntimeFunctionRefinement());			
-				subtreeRewriterC = new CRuntimeSubtreeIntegration();
-			} else if (cmd.lifting_language.equals("java")) {
-				compositionRules.add(new JavaRuntimeReplacement());
-				compositionRules.add(new JavaRuntimeFunctionRefinement());
-				subtreeRewriterJava = new JavaRuntimeSubtreeIntegration();
-			} else {
-				throw new InternalError("lifting language \"" + cmd.lifting_language + "\" is not implemented.");
-			}
-		} else {
-			compositionRules.add(new Replacement());
-			compositionRules.add(new JavaMethodOverridingMeta());
-		}
-		compositionRules.add(new InvariantCompositionMeta());
-		compositionRules.add(new ContractCompositionMeta(cmd.contract_style));
-		compositionRules.add(new StringConcatenation());
-		compositionRules.add(new ImplementsListMerging());
-		compositionRules.add(new CSharpMethodOverriding());
-		compositionRules.add(new ConstructorConcatenationMeta());
-		compositionRules.add(new ModifierListSpecialization());
-		compositionRules.add(new FieldOverridingMeta());
-		compositionRules.add(new ExpansionOverriding());
-		compositionRules.add(new CompositionError());
+		//select the default composition rules
+		setupCompositionRuleset();
+		
+		//some rules need to be exchanged
+		compositionRules
+			.addRule(new JavaMethodOverridingMeta())
+			.addRule(new InvariantCompositionMeta())
+			.addRule(new ContractCompositionMeta(cmd.contract_style))
+			.addRule(new ConstructorConcatenationMeta())
+			.addRule(new FieldOverridingMeta());
 		
 		try {
 			try {
@@ -177,7 +159,7 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 	private void preProcessSubtree(FSTNode child) {
 		if (child instanceof FSTNonTerminal) {
 			if (child.getType().equals("ClassDeclaration")) {
-				// TODO wann und warum ist das nötig (siehe Stack)
+				// TODO wann und warum ist das nï¿½tig (siehe Stack)
 //				FSTNonTerminal cOrIDeclaration = new FSTNonTerminal("ClassOrInterfaceBodyDeclaration1", "FeatureModel");
 //				((FSTNonTerminal) child).getChildren().add(0, cOrIDeclaration);
 //				FSTNonTerminal jmlDeclaration = new FSTNonTerminal("JMLDeclaration1", "FeatureModel.fm()");
@@ -196,11 +178,9 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 				}
 			}
 		} else if (child instanceof FSTTerminal) {
-			for (CompositionRule rule: compositionRules) {
-				if (((FSTTerminal) child).getCompositionMechanism().equals(rule.getRuleName())) {	
-					rule.preCompose((FSTTerminal) child);
-					break;
-				}
+			CompositionRule rule = compositionRules.getRule(((FSTTerminal) child).getCompositionMechanism());
+			if (rule != null) {
+				rule.preCompose((FSTTerminal) child);
 			}
 		}
 	}
@@ -211,11 +191,9 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 				postProcess(node);
 			}
 		} else if (child instanceof FSTTerminal) {
-			for (CompositionRule rule: compositionRules) {
-				if (((FSTTerminal) child).getCompositionMechanism().equals(rule.getRuleName())) {	
-					rule.postCompose((FSTTerminal) child);
-					break;
-				}
+			CompositionRule rule = compositionRules.getRule(((FSTTerminal) child).getCompositionMechanism());
+			if (rule != null) {
+				rule.postCompose((FSTTerminal) child);
 			}
 		}
 	}
