@@ -3,7 +3,6 @@ package composer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,27 +11,14 @@ import builder.ArtifactBuilderInterface;
 import builder.capprox.CApproxBuilder;
 import builder.java.JavaBuilder;
 
-import composer.rules.CSharpMethodOverriding;
-import composer.rules.CompositionError;
 import composer.rules.CompositionRule;
-import composer.rules.ExpansionOverriding;
-import composer.rules.ImplementsListMerging;
-import composer.rules.ModifierListSpecialization;
-import composer.rules.Replacement;
-import composer.rules.StringConcatenation;
 import composer.rules.meta.ConstructorConcatenationMeta;
 import composer.rules.meta.ContractCompositionMeta;
 import composer.rules.meta.FieldOverridingMeta;
 import composer.rules.meta.InvariantCompositionMeta;
 import composer.rules.meta.JavaMethodOverridingMeta;
 import composer.rules.rtcomp.c.CRuntimeFeatureSelection;
-import composer.rules.rtcomp.c.CRuntimeFunctionRefinement;
-import composer.rules.rtcomp.c.CRuntimeReplacement;
-import composer.rules.rtcomp.c.CRuntimeSubtreeIntegration;
 import composer.rules.rtcomp.java.JavaRuntimeFeatureSelection;
-import composer.rules.rtcomp.java.JavaRuntimeFunctionRefinement;
-import composer.rules.rtcomp.java.JavaRuntimeReplacement;
-import composer.rules.rtcomp.java.JavaRuntimeSubtreeIntegration;
 
 import counter.Counter;
 import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
