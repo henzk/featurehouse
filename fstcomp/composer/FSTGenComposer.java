@@ -14,24 +14,14 @@ import builder.ArtifactBuilderInterface;
 import builder.capprox.CApproxBuilder;
 import builder.java.JavaBuilder;
 
-import composer.rules.CSharpMethodOverriding;
-import composer.rules.CompositionError;
 import composer.rules.CompositionRule;
-import composer.rules.ConstructorConcatenation;
-import composer.rules.ContractComposition;
-import composer.rules.ExpansionOverriding;
-import composer.rules.FieldOverriding;
-import composer.rules.ImplementsListMerging;
 import composer.rules.JavaMethodOverriding;
-import composer.rules.ModifierListSpecialization;
-import composer.rules.Replacement;
-import composer.rules.StringConcatenation;
 import composer.rules.rtcomp.c.CRuntimeFeatureSelection;
-import composer.rules.rtcomp.c.CRuntimeFunctionRefinement;
-import composer.rules.rtcomp.c.CRuntimeReplacement;
 import composer.rules.rtcomp.java.JavaRuntimeFeatureSelection;
 import composer.rules.rtcomp.java.JavaRuntimeFunctionRefinement;
-import composer.rules.rtcomp.java.JavaRuntimeReplacement;
+import composer.rulesets.CVarEncRuleset;
+import composer.rulesets.DefaultRuleset;
+import composer.rulesets.JavaVarEncRuleset;
 
 import counter.Counter;
 import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
@@ -62,33 +52,20 @@ public class FSTGenComposer extends FSTGenProcessor {
 	protected void setupCompositionRuleset() {
 		compositionRules = new CompositionRuleset();
 		
-		//default rules
-		compositionRules
-			.addRule(new Replacement())
-			.addRule(new JavaMethodOverriding())
-			.addRule(new ContractComposition(cmd.contract_style))
-			.addRule(new StringConcatenation())
-			.addRule(new ImplementsListMerging())
-			.addRule(new CSharpMethodOverriding())
-			.addRule(new ConstructorConcatenation())
-			.addRule(new ModifierListSpecialization())
-			.addRule(new FieldOverriding())
-			.addRule(new ExpansionOverriding())
-			.addRule(new CompositionError());
-		
 		//variability encoding uses special rules
 		if (cmd.lifting) {
 			if (cmd.lifting_language.equals("c")) { 
-				compositionRules
-					.addRule(new CRuntimeReplacement())
-					.addRule(new CRuntimeFunctionRefinement());			
+				compositionRules = new CVarEncRuleset();
+								
 			} else if (cmd.lifting_language.equals("java")) {
-				compositionRules
-					.addRule(new JavaRuntimeReplacement())
-					.addRule(new JavaRuntimeFunctionRefinement());
+				compositionRules = new JavaVarEncRuleset();
+					
 			} else {
 				throw new InternalError("lifting language \"" + cmd.lifting_language + "\" is not implemented.");
 			}
+		} else {
+			//default rules
+			compositionRules = new DefaultRuleset();
 		}
 	}
 	
@@ -362,6 +339,4 @@ public class FSTGenComposer extends FSTGenProcessor {
 		} else
 			return null;
 	}
-	
-
 }

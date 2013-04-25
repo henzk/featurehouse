@@ -12,13 +12,9 @@ import builder.capprox.CApproxBuilder;
 import builder.java.JavaBuilder;
 
 import composer.rules.CompositionRule;
-import composer.rules.meta.ConstructorConcatenationMeta;
-import composer.rules.meta.ContractCompositionMeta;
-import composer.rules.meta.FieldOverridingMeta;
-import composer.rules.meta.InvariantCompositionMeta;
-import composer.rules.meta.JavaMethodOverridingMeta;
 import composer.rules.rtcomp.c.CRuntimeFeatureSelection;
 import composer.rules.rtcomp.java.JavaRuntimeFeatureSelection;
+import composer.rulesets.MetaRuleset;
 
 import counter.Counter;
 import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
@@ -50,16 +46,8 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 	private void build(String[] args, String[] featuresArg, boolean compose) {
 		meta.clearFeatures();
 		cmd.parseCmdLineArguments(args);
-		//select the default composition rules
-		setupCompositionRuleset();
 		
-		//some rules need to be exchanged
-		compositionRules
-			.addRule(new JavaMethodOverridingMeta())
-			.addRule(new InvariantCompositionMeta())
-			.addRule(new ContractCompositionMeta(cmd.contract_style))
-			.addRule(new ConstructorConcatenationMeta())
-			.addRule(new FieldOverridingMeta());
+		compositionRules = new MetaRuleset(cmd.contract_style);
 		
 		try {
 			try {

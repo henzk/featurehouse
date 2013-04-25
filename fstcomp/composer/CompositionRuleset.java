@@ -9,7 +9,7 @@ public class CompositionRuleset {
 
 	private Map<String, CompositionRule> rules = new HashMap<String, CompositionRule>();
 	
-	public CompositionRuleset addRule(CompositionRule rule) {
+	protected CompositionRuleset setRule(CompositionRule rule) {
 		rules.put(rule.getRuleName(), rule);
 		return this;
 	}
