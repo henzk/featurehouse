@@ -50,8 +50,6 @@ public class FSTGenComposer extends FSTGenProcessor {
 	}
 	
 	protected void setupCompositionRuleset() {
-		compositionRules = new CompositionRuleset();
-		
 		//variability encoding uses special rules
 		if (cmd.lifting) {
 			if (cmd.lifting_language.equals("c")) { 
