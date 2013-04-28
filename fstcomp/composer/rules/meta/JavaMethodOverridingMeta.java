@@ -2,6 +2,8 @@ package composer.rules.meta;
 
 import java.util.List;
 
+import metadata.CompositionMetadataStore;
+
 import composer.FSTGenComposerExtension;
 import composer.rules.JavaMethodOverriding;
 
@@ -18,6 +20,10 @@ import de.ovgu.cide.fstgen.ast.FSTTerminal;
  */
 public class JavaMethodOverridingMeta extends JavaMethodOverriding {
 	
+	public JavaMethodOverridingMeta(CompositionMetadataStore metadataStore) {
+		super(metadataStore);
+	}
+
 	/**
 	 * TODO description
 	 */

@@ -132,7 +132,7 @@ public final class CompositionMetadataStore {
 		
 		return methodName;
 	}
-	
+
 	/**
 	 * 
 	 * @return String representation of the meta data in JSON format.
@@ -192,7 +192,7 @@ public final class CompositionMetadataStore {
 		buff.append("\n}\n");
 		return buff.toString();
 	}
-	
+
 	public void saveToFile(File filename) throws IOException {
 		FileWriter fw = null;
 		try {
@@ -203,22 +203,6 @@ public final class CompositionMetadataStore {
 				fw.close();
 			}
 		}
-	}
-	
-	private CompositionMetadataStore() {}	
-	
-	@Override
-	protected final Object clone() throws CloneNotSupportedException {
-		throw new CloneNotSupportedException();
-	}
-		
-	private static CompositionMetadataStore instance = null;
-	
-	public static final synchronized CompositionMetadataStore getInstance() {
-		if (instance == null) {
-			instance = new CompositionMetadataStore();
-		}
-		return instance;
 	}
 
 	public List<String> getFeatures() {

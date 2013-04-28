@@ -43,7 +43,7 @@ public class DefaultRuleset extends CompositionRuleset {
 		roleFile = new File(conf.outputDirectoryName + File.separator + "roles.meta");
 		setIntroductionRule(new Introduction(metadataStore));
 		setRule(new Replacement());
-		setRule(new JavaMethodOverriding());
+		setRule(new JavaMethodOverriding(metadataStore));
 		setRule(new StringConcatenation());
 		setRule(new ImplementsListMerging());
 		setRule(new CSharpMethodOverriding());

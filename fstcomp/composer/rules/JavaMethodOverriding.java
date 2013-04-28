@@ -16,8 +16,15 @@ public class JavaMethodOverriding extends AbstractCompositionRule {
 
 	public static final String featureAnnotationPrefix = "@featureHouse.FeatureAnnotation(name=\"";
 	
-	public final static String COMPOSITION_RULE_NAME = "JavaMethodOverriding";
+	public static final String COMPOSITION_RULE_NAME = "JavaMethodOverriding";
+
+	protected CompositionMetadataStore metadataStore;
 	
+	public JavaMethodOverriding(CompositionMetadataStore metadataStore) {
+		super();
+		this.metadataStore = metadataStore;
+	}
+
 	public static void setFeatureAnnotation(boolean addFeatureAnnotation) {
 		JavaMethodOverriding.addFeatureAnnotations=addFeatureAnnotation;
 	}
@@ -25,14 +32,12 @@ public class JavaMethodOverriding extends AbstractCompositionRule {
 	public void compose(FSTTerminal terminalA, FSTTerminal terminalB,
 			FSTTerminal terminalComp, FSTNonTerminal nonterminalParent) {
 
-		CompositionMetadataStore meta = CompositionMetadataStore.getInstance();
-
 		specializeModifiers(terminalA, terminalB);
 
 		if (!replaceOriginal(terminalA)) {
 			terminalComp.setBody(terminalA.getBody());
-			String funcName = meta.getMethodName(terminalA);
-			meta.putMapping(funcName, getFeatureName(terminalA), funcName);
+			String funcName = metadataStore.getMethodName(terminalA);
+			metadataStore.putMapping(funcName, getFeatureName(terminalA), funcName);
 		} else {
 			FSTTerminal terminalComp2 = null;
 			FSTNonTerminal terminalParentComp2 = null;
@@ -71,9 +76,9 @@ public class JavaMethodOverriding extends AbstractCompositionRule {
 			}
 			terminalComp.setBody(newBody);
 
-			meta.putMapping(oldMethodName, getFeatureName(terminalB),
+			metadataStore.putMapping(oldMethodName, getFeatureName(terminalB),
 					newMethodName);
-			meta.putMapping(oldMethodName, getFeatureName(terminalA),
+			metadataStore.putMapping(oldMethodName, getFeatureName(terminalA),
 					oldMethodName);
 
 			//split the body of terminalComp2 in its major components; modify them seperately
