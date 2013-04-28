@@ -19,7 +19,7 @@ public class JavaVarEncRuleset extends VarEncRuleset {
 	@Override
 	protected void generateSimulator() {
 		try {
-			new JavaRuntimeFeatureSelection(meta, cnfFile).saveTo(conf.getOutputDir());
+			new JavaRuntimeFeatureSelection(metadataStore, cnfFile).saveTo(conf.getOutputDir());
 		} catch (IOException e) {
 			System.err.println("Error generating program simulator:");
 			e.printStackTrace();

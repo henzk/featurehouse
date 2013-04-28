@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import composer.Configuration;
+import composer.rules.rtcomp.VarEncIntroduction;
 
 import builder.ArtifactBuilderInterface;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
@@ -27,7 +28,7 @@ import metadata.CompositionMetadataStore;
  */
 public abstract class VarEncRuleset extends DefaultRuleset {
 
-	protected CompositionMetadataStore meta;
+	protected CompositionMetadataStore metadataStore;
 	protected File roleFile;
 	protected File cnfFile;
 
@@ -40,7 +41,8 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 	@Override
 	public void configure(Configuration conf) {
 		super.configure(conf);
-		meta = CompositionMetadataStore.getInstance();
+		metadataStore = CompositionMetadataStore.getInstance();
+		setIntroductionRule(new VarEncIntroduction(metadataStore));
 		roleFile = new File(conf.outputDirectoryName + File.separator + "roles.meta");
 		cnfFile = new File(conf.equationBaseDirectoryName, "model.cnf");
 	}
@@ -51,7 +53,7 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 	@Override
 	public void initializeComposition() {
 		super.initializeComposition();
-		meta.clearFeatures();
+		metadataStore.clearFeatures();
 	}
 
 	/**
@@ -62,7 +64,7 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 			List<FSTNonTerminal> features) {
 		super.preCompose(builder, features);
 		for (FSTNonTerminal feature : features) {
-			meta.addFeature(feature.getName());
+			metadataStore.addFeature(feature.getName());
 		}
 	}
 
@@ -75,7 +77,7 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 		super.finalizeComposition();
 
 		try {
-			meta.saveToFile(roleFile);
+			metadataStore.saveToFile(roleFile);
 		} catch (IOException e) {
 			System.err.println("Error writing roles metadata to `" + roleFile + "` :");
 			e.printStackTrace();

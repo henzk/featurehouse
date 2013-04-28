@@ -19,7 +19,7 @@ public class CVarEncRuleset extends VarEncRuleset {
 	@Override
 	protected void generateSimulator() {
 		try {
-			new CRuntimeFeatureSelection(meta, cnfFile).saveTo(conf.getOutputDir());
+			new CRuntimeFeatureSelection(metadataStore, cnfFile).saveTo(conf.getOutputDir());
 		} catch (IOException e) {
 			System.err.println("Error while generating program simulator:");
 			e.printStackTrace();

@@ -8,16 +8,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import metadata.CompositionMetadataStore;
-import printer.PrintVisitorException;
 import builder.ArtifactBuilderInterface;
 import builder.capprox.CApproxBuilder;
 import builder.java.JavaBuilder;
 
 import composer.rules.CompositionRule;
 import composer.rules.JavaMethodOverriding;
-import composer.rules.rtcomp.c.CRuntimeFeatureSelection;
-import composer.rules.rtcomp.java.JavaRuntimeFeatureSelection;
 import composer.rules.rtcomp.java.JavaRuntimeFunctionRefinement;
 import composer.rulesets.CVarEncRuleset;
 import composer.rulesets.DefaultRuleset;
@@ -33,10 +29,8 @@ public class FSTGenComposer extends FSTGenProcessor {
 
 	protected Configuration conf;
 	
-	protected CompositionMetadataStore meta = CompositionMetadataStore.getInstance();
-	
 	protected CompositionRuleset compositionRules;
-	/*
+
 	public FSTGenComposer() {
 		super();
 	}
@@ -49,7 +43,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 			AbstractFSTParser.fstnodes.clear();
 		}
 	}
-	*/
+
 	public FSTGenComposer(Configuration conf) {
 		this.conf = conf;
 	}
@@ -75,7 +69,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 	public void run() {
 		JavaMethodOverriding.setFeatureAnnotation(conf.featureAnnotation);
 		JavaRuntimeFunctionRefinement.setFeatureAnnotation(conf.featureAnnotation);
-		
+
 		//select the composition rules
 		setupCompositionRuleset();
 		compositionRules.initializeComposition();
@@ -87,7 +81,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 				fireParseErrorOccured(e1);
 				e1.printStackTrace();
 			}
-				
+
 			featureVisitor.setWorkingDir(conf.getOutputDir());
 			featureVisitor.setExpressionName(conf.equationFileName);
 			
@@ -102,8 +96,9 @@ public class FSTGenComposer extends FSTGenProcessor {
 					if(features.size() > 0)
 						counter.writeFile(new File(conf.equationFileName + ".rsf"));
 				}
-				
+
 				compositionRules.preCompose(builder, features);
+
 				FSTNode composition = compose(features);
 
 				compositionRules.postCompose(builder, features, composition);
@@ -117,26 +112,27 @@ public class FSTGenComposer extends FSTGenProcessor {
         				    composition.accept(visitor);
         				}
 				*/
+
 			}
 			setFstnodes(AbstractFSTParser.fstnodes);
 			compositionRules.finalizeComposition();
-		
+
 			String equationName = new File(conf.equationFileName).getName();
 			equationName = equationName.substring(0, equationName.length() - 4);
-		
+
 			if (conf.featureAnnotation) {
-				File srcDir = new File(outputDir + File.separator + equationName+ File.separator);
+				File srcDir = new File(conf.getOutputDir(), equationName);
 				saveFeatureAnnotationFile(srcDir);
 				if (conf.lifting && "java".equals(conf.lifting_language.toLowerCase())) {
 					saveSwitchIDAnnotationFile(srcDir);
 				}
 			}
-			
+
 		} catch (FileNotFoundException e1) {
 			//e1.printStackTrace();
 		}
 	}
-	
+
 	private void saveFeatureAnnotationFile(File srcDir) {
 		File f = new File(srcDir+File.separator+"featureHouse"+File.separator, "FeatureAnnotation.java");
 		f.getParentFile().mkdirs();
@@ -159,7 +155,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 			System.err.println("Could not write FeatureAnnotation.java " + e.getMessage());
 		}
 	}
-	
+
 	private void saveSwitchIDAnnotationFile(File srcDir) {
 		File f = new File(srcDir+File.separator+"featureHouse"+File.separator, "FeatureSwitchID.java");
 		f.getParentFile().mkdirs();
@@ -249,8 +245,10 @@ public class FSTGenComposer extends FSTGenProcessor {
 					// root)
 					if (childA == null) {
 						// no compatible child, FST-node only in B
-						FSTNode newChildB = childB.getDeepClone();
-						meta.discoverFuncIntroductions(newChildB);
+
+						FSTNode newChildB = compositionRules.getIntroductionRule()
+								.introduce(null, childB.getDeepClone(), nonterminalComp);
+
 						nonterminalComp.addChild(newChildB);
 					} else {
 						nonterminalComp.addChild(compose(childA, childB,
@@ -261,8 +259,8 @@ public class FSTGenComposer extends FSTGenProcessor {
 					FSTNode childB = nonterminalB.getCompatibleChild(childA);
 					if (childB == null) {
 						// no compatible child, FST-node only in A
-						FSTNode newChildA = childA.getDeepClone();
-						meta.discoverFuncIntroductions(newChildA);
+						FSTNode newChildA = compositionRules.getIntroductionRule()
+								.introduce(childA.getDeepClone(), null, nonterminalComp);
 
 						if (conf.featureAnnotation) {
 							if (newChildA instanceof FSTNonTerminal) {

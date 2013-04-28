@@ -10,6 +10,7 @@ import printer.PrintVisitorException;
 import builder.ArtifactBuilderInterface;
 
 import composer.rules.CompositionRule;
+import composer.rules.IntroductionRule;
 import de.ovgu.cide.fstgen.ast.FSTNode;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
 
@@ -22,6 +23,7 @@ public abstract class CompositionRuleset {
 
 	protected FeaturePrintVisitor printVisitor = new FeaturePrintVisitor();
 	protected Configuration conf;
+	private IntroductionRule introductionRule;
 	private Map<String, CompositionRule> rules = new HashMap<String, CompositionRule>();
 	private boolean generateOutput = true;
 
@@ -46,6 +48,14 @@ public abstract class CompositionRuleset {
 
 	public CompositionRule getRule(String name) {
 		return rules.get(name);
+	}
+
+	protected void setIntroductionRule(IntroductionRule introductionRule) {
+		this.introductionRule = introductionRule;
+	}
+
+	public IntroductionRule getIntroductionRule() {
+		return introductionRule;
 	}
 
 	public void configure(Configuration conf) {
