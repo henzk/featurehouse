@@ -36,39 +36,8 @@ public class CmdLineInterpreter {
 	
 	public static final String INPUT_OPTION_ANNOTATION = "--featureAnnotationJava";
 
-	public boolean verbose = false;
-
-	public boolean isCount = false;
-
-	public boolean isAheadEquationFile;
-
-	public String equationFileName;
-
-	public String equationBaseDirectoryName;
-
-	public String outputDirectoryName = null;
-
-	public String contract_style = "none";
-
-	public boolean isBaseDirectoryName = false;
-
-	public boolean showXML = false;
-
-	public boolean showFST = false;
-
-	public boolean showSum = false;
-
-	public boolean showGui = false;
-
-	public boolean fileOutput = false;
-
-	public boolean lifting = false;
-
-	public String lifting_language = "";
-	
-	public boolean featureAnnotation = false;
-
-	public void parseCmdLineArguments(String[] args) {
+	public static Configuration parseCmdLineArguments(String[] args) {
+		Configuration conf = new Configuration();
 		boolean jml = false;
 		boolean errorOccured = false;
 		if (args != null && args.length > 0) {
@@ -76,13 +45,13 @@ public class CmdLineInterpreter {
 				if (args[i].equals(INPUT_OPTION_EQUATIONFILE)) {
 					i++;
 					if (i < args.length) {
-						equationFileName = args[i];
-						if (!isBaseDirectoryName)
-							equationBaseDirectoryName = getDirectoryName(new File(
-									equationFileName)) + File.separator;
-						equationFileName = equationFileName.replace("\\",
+						conf.equationFileName = args[i];
+						if (!conf.isBaseDirectoryName)
+							conf.equationBaseDirectoryName = getDirectoryName(new File(
+									conf.equationFileName)) + File.separator;
+						conf.equationFileName = conf.equationFileName.replace("\\",
 								File.separator);
-						equationFileName = equationFileName.replace("/",
+						conf.equationFileName = conf.equationFileName.replace("/",
 								File.separator);
 					} else {
 						System.out.println("Error occured option: "
@@ -92,12 +61,12 @@ public class CmdLineInterpreter {
 				} else if (args[i].equals(INPUT_OPTION_BASE_DIRECTORY)) {
 					i++;
 					if (i < args.length) {
-						equationBaseDirectoryName = args[i];
-						equationBaseDirectoryName = equationBaseDirectoryName
+						conf.equationBaseDirectoryName = args[i];
+						conf.equationBaseDirectoryName = conf.equationBaseDirectoryName
 								.replace("\\", File.separator);
-						equationBaseDirectoryName = equationBaseDirectoryName
+						conf.equationBaseDirectoryName = conf.equationBaseDirectoryName
 								.replace("/", File.separator);
-						isBaseDirectoryName = true;
+						conf.isBaseDirectoryName = true;
 					} else {
 						System.out.println("Error occured option: "
 								+ INPUT_OPTION_BASE_DIRECTORY);
@@ -106,34 +75,34 @@ public class CmdLineInterpreter {
 				} else if (args[i].equals(INPUT_OPTION_OUTPUT_DIRECTORY)) {
 					i++;
 					if (i < args.length) {
-						outputDirectoryName = args[i];
+						conf.outputDirectoryName = args[i];
 					} else {
 						System.out.println("Error occured option: "
 								+ INPUT_OPTION_OUTPUT_DIRECTORY);
 						errorOccured = true;
 					}
 				} else if (args[i].equals(INPUT_OPTION_COUNT)) {
-					isCount = true;
+					conf.isCount = true;
 				} else if (args[i].equals(INPUT_OPTION_FILE_OUTPUT)) {
-					fileOutput = true;
+					conf.fileOutput = true;
 				} else if (args[i].equals(INPUT_OPTION_SHOW_GUI)) {
-					showGui = true;
+					conf.showGui = true;
 				} else if (args[i].equals(INPUT_OPTION_SHOW_XML)) {
-					showXML = true;
+					conf.showXML = true;
 				} else if (args[i].equals(INPUT_OPTION_SHOW_FST)) {
-					showFST = true;
+					conf.showFST = true;
 				} else if (args[i].equals(INPUT_OPTION_SHOW_SUM)) {
-					showSum = true;
+					conf.showSum = true;
 				} else if (args[i].equals(INPUT_OPTION_AHEAD_EQUATION_FILE)) {
-					isAheadEquationFile = true;
+					conf.isAheadEquationFile = true;
 				} else if (args[i].equals(INPUT_OPTION_ANNOTATION)) {
-					featureAnnotation = true;
+					conf.featureAnnotation = true;
 				} else if (args[i].startsWith(INPUT_OPTION_LIFTING)) {
-					lifting = true;
-					lifting_language = args[i]
+					conf.lifting = true;
+					conf.lifting_language = args[i]
 							.substring(INPUT_OPTION_LIFTING.length()).trim()
 							.toLowerCase();
-					if (!(lifting_language.equals("java") || lifting_language
+					if (!(conf.lifting_language.equals("java") || conf.lifting_language
 							.equals("c"))) {
 						throw new IllegalArgumentException(
 								"Lifting requires a language as parameter (e.g. --liftC or --liftJava)");
@@ -146,13 +115,13 @@ public class CmdLineInterpreter {
 					printHelp(false);
 				} else if (args[i].equals(INPUT_OPTION_CONTRACT_STYLE)) {
 					i++;
-					contract_style=args[i];
-					if (!contract_style.equals("none"))
+					conf.contract_style=args[i];
+					if (!conf.contract_style.equals("none"))
 						jml = true;
-					else if (!(contract_style.equals("plain_contracting")
-							|| contract_style.equals("explicit_contracting")
-							|| contract_style.equals("contract_overriding")
-							|| contract_style.equals("consecutive_contracting") || contract_style
+					else if (!(conf.contract_style.equals("plain_contracting")
+							|| conf.contract_style.equals("explicit_contracting")
+							|| conf.contract_style.equals("contract_overriding")
+							|| conf.contract_style.equals("consecutive_contracting") || conf.contract_style
 								.equals("none"))) {
 						throw new IllegalArgumentException(
 								"Unknown contract style. Please choose from: plain_contracting, explicit_contracting, consecutive_contracting");
@@ -167,11 +136,12 @@ public class CmdLineInterpreter {
 			errorOccured = true;
 		}
 
-		CommandLineParameterHelper.setJML(jml);
+		CommandLineParameterHelper.setJML(jml);//FIXME
 
 		if (errorOccured) {
 			printHelp(errorOccured);
 		}
+		return conf;
 	}
 
 	private static void printHelp(boolean errorOccured) {

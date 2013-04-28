@@ -31,11 +31,12 @@ import de.ovgu.cide.fstgen.ast.FSTTerminal;
 
 public class FSTGenComposer extends FSTGenProcessor {
 
-	protected CmdLineInterpreter cmd = new CmdLineInterpreter();
+	protected Configuration conf;
 	
 	protected CompositionMetadataStore meta = CompositionMetadataStore.getInstance();
-	protected CompositionRuleset compositionRules;
 	
+	protected CompositionRuleset compositionRules;
+	/*
 	public FSTGenComposer() {
 		super();
 	}
@@ -48,18 +49,22 @@ public class FSTGenComposer extends FSTGenProcessor {
 			AbstractFSTParser.fstnodes.clear();
 		}
 	}
-	
+	*/
+	public FSTGenComposer(Configuration conf) {
+		this.conf = conf;
+	}
+
 	protected void setupCompositionRuleset() {
 		//variability encoding uses special rules
-		if (cmd.lifting) {
-			if (cmd.lifting_language.equals("c")) { 
+		if (conf.lifting) {
+			if (conf.lifting_language.equals("c")) { 
 				compositionRules = new CVarEncRuleset();
 								
-			} else if (cmd.lifting_language.equals("java")) {
+			} else if (conf.lifting_language.equals("java")) {
 				compositionRules = new JavaVarEncRuleset();
 					
 			} else {
-				throw new InternalError("lifting language \"" + cmd.lifting_language + "\" is not implemented.");
+				throw new InternalError("lifting language \"" + conf.lifting_language + "\" is not implemented.");
 			}
 		} else {
 			//default rules
@@ -67,43 +72,35 @@ public class FSTGenComposer extends FSTGenProcessor {
 		}
 	}
 	
-	public void run(String[] args) {
-		meta.clearFeatures();
-		cmd.parseCmdLineArguments(args);
-		JavaMethodOverriding.setFeatureAnnotation(cmd.featureAnnotation);
-		JavaRuntimeFunctionRefinement.setFeatureAnnotation(cmd.featureAnnotation);
+	public void run() {
+		JavaMethodOverriding.setFeatureAnnotation(conf.featureAnnotation);
+		JavaRuntimeFunctionRefinement.setFeatureAnnotation(conf.featureAnnotation);
 		
 		//select the composition rules
 		setupCompositionRuleset();
 		
 		try {
 			try {
-				fileLoader.loadFiles(cmd.equationFileName, cmd.equationBaseDirectoryName, cmd.isAheadEquationFile);
+				fileLoader.loadFiles(conf.equationFileName, conf.equationBaseDirectoryName, conf.isAheadEquationFile);
 			} catch (cide.gparser.ParseException e1) {
 				System.out.println("error");
 				fireParseErrorOccured(e1);
 				e1.printStackTrace();
 			}
-			String outputDir = cmd.equationBaseDirectoryName;
-			if (cmd.outputDirectoryName != null)
-				outputDir = cmd.outputDirectoryName;
-
-			if (outputDir.endsWith(File.separator))
-				outputDir = outputDir.substring(0, outputDir.length()-1);
 				
-			featureVisitor.setWorkingDir(outputDir);
-			featureVisitor.setExpressionName(cmd.equationFileName);
+			featureVisitor.setWorkingDir(conf.getOutputDir());
+			featureVisitor.setExpressionName(conf.equationFileName);
 			
 			for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
 				LinkedList<FSTNonTerminal> features = builder.getFeatures();
 
-				if(cmd.isCount && (builder instanceof JavaBuilder || builder instanceof CApproxBuilder)) {
+				if(conf.isCount && (builder instanceof JavaBuilder || builder instanceof CApproxBuilder)) {
 					Counter counter = new Counter();
 					for (FSTNonTerminal feature : features) {
 						counter.collect(feature);
 					}
 					if(features.size() > 0)
-						counter.writeFile(new File(cmd.equationFileName + ".rsf"));
+						counter.writeFile(new File(conf.equationFileName + ".rsf"));
 				}
 				
 				for (FSTNonTerminal feature : features) {
@@ -128,13 +125,13 @@ public class FSTGenComposer extends FSTGenProcessor {
 			}
 			setFstnodes(AbstractFSTParser.fstnodes);
 		
-			String equationName = new File(cmd.equationFileName).getName();
+			String equationName = new File(conf.equationFileName).getName();
 			equationName = equationName.substring(0, equationName.length() - 4);
 		
-			if (cmd.featureAnnotation) {
+			if (conf.featureAnnotation) {
 				File srcDir = new File(outputDir + File.separator + equationName+ File.separator);
 				saveFeatureAnnotationFile(srcDir);
-				if (cmd.lifting && "java".equals(cmd.lifting_language.toLowerCase())) {
+				if (conf.lifting && "java".equals(conf.lifting_language.toLowerCase())) {
 					saveSwitchIDAnnotationFile(srcDir);
 				}
 			}
@@ -215,8 +212,9 @@ public class FSTGenComposer extends FSTGenProcessor {
 	}
 
 	public static void main(String[] args) {
-		FSTGenComposer composer = new FSTGenComposer();
-		composer.run(args);
+		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
+		FSTGenComposer composer = new FSTGenComposer(conf);
+		composer.run();
 	}
 
 	private FSTNode compose(List<FSTNonTerminal> tl) {
@@ -225,7 +223,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 			if (composed != null) {
 				composed = compose(current, composed);
 			} else {
-				if (cmd.featureAnnotation) {
+				if (conf.featureAnnotation) {
 					addAnnotationToChildrenMethods(current, JavaMethodOverriding.getFeatureName(current));
 				}
 				composed = current;
@@ -292,7 +290,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 						FSTNode newChildA = childA.getDeepClone();
 						meta.discoverFuncIntroductions(newChildA);
 
-						if (cmd.featureAnnotation) {
+						if (conf.featureAnnotation) {
 							if (newChildA instanceof FSTNonTerminal) {
 								addAnnotationToChildrenMethods(newChildA, JavaMethodOverriding.getFeatureName(childA));
 							} else if (newChildA instanceof FSTTerminal) {
