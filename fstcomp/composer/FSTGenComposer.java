@@ -78,7 +78,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		
 		//select the composition rules
 		setupCompositionRuleset();
-		
+		compositionRules.initializeComposition();
 		try {
 			try {
 				fileLoader.loadFiles(conf.equationFileName, conf.equationBaseDirectoryName, conf.isAheadEquationFile);
@@ -103,10 +103,13 @@ public class FSTGenComposer extends FSTGenProcessor {
 						counter.writeFile(new File(conf.equationFileName + ".rsf"));
 				}
 				
+				compositionRules.preCompose(builder, features);
 				for (FSTNonTerminal feature : features) {
 					meta.addFeature(feature.getName());
 				}
 				FSTNode composition = compose(features);
+
+				compositionRules.postCompose(builder, features, composition);
 //				modify(composition);
 
 				/* 
@@ -117,13 +120,9 @@ public class FSTGenComposer extends FSTGenProcessor {
         				    composition.accept(visitor);
         				}
 				*/
-				try {
-					featureVisitor.visit((FSTNonTerminal) composition);
-				} catch (PrintVisitorException e) {
-					e.printStackTrace();
-				}
 			}
 			setFstnodes(AbstractFSTParser.fstnodes);
+			compositionRules.finalizeComposition();
 		
 			String equationName = new File(conf.equationFileName).getName();
 			equationName = equationName.substring(0, equationName.length() - 4);
