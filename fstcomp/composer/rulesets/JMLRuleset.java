@@ -1,11 +1,13 @@
 package composer.rulesets;
 
+import composer.Configuration;
 import composer.rules.ContractComposition;
 
 public class JMLRuleset extends DefaultRuleset {
 
-	public JMLRuleset(String contractStyle) {
-		super();
-		setRule(new ContractComposition(contractStyle));
+	@Override
+	public void configure(Configuration conf) {
+		super.configure(conf);
+		setRule(new ContractComposition(conf.contract_style));
 	}
 }

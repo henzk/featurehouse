@@ -1,6 +1,9 @@
 package composer.rulesets;
 
+
+
 import composer.CompositionRuleset;
+import composer.Configuration;
 import composer.rules.CSharpMethodOverriding;
 import composer.rules.CompositionError;
 import composer.rules.ConstructorConcatenation;
@@ -14,8 +17,9 @@ import composer.rules.StringConcatenation;
 
 public class DefaultRuleset extends CompositionRuleset {
 
-	public DefaultRuleset() {
-		super();
+	@Override
+	public void configure(Configuration conf) {
+		super.configure(conf);
 		setRule(new Replacement());
 		setRule(new JavaMethodOverriding());
 		setRule(new StringConcatenation());
@@ -27,4 +31,5 @@ public class DefaultRuleset extends CompositionRuleset {
 		setRule(new ExpansionOverriding());
 		setRule(new CompositionError());
 	}
+
 }
