@@ -1,5 +1,6 @@
 package metadata;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -192,7 +193,7 @@ public final class CompositionMetadataStore {
 		return buff.toString();
 	}
 	
-	public void saveToFile(String filename) throws IOException {
+	public void saveToFile(File filename) throws IOException {
 		FileWriter fw = null;
 		try {
 			fw = new FileWriter(filename);

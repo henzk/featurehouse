@@ -69,11 +69,11 @@ public class JavaRuntimeFeatureSelection {
 		javaFileContents += "}";
 	}
 	
-	public void saveTo(String filebasename) throws IOException {
+	public void saveTo(File simulatorDir) throws IOException {
 		process();
 		FileWriter javafile = null;
 		try{
-			javafile = new FileWriter(filebasename + "FeatureSwitches.java");
+			javafile = new FileWriter(new File(simulatorDir, "FeatureSwitches.java"));
 			javafile.write(javaFileContents);	
 		}finally {
 			if (javafile != null) {

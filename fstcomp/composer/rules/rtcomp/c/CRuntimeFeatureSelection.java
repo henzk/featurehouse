@@ -69,11 +69,12 @@ public class CRuntimeFeatureSelection {
 		
 		}
 	
-	public void saveTo(String filebasename) throws IOException {
+	public void saveTo(File simulatorDir) throws IOException {
+		File outputDir = new File(simulatorDir, "features");
 		process();
 		FileWriter headerfile = null;
 		try {
-		headerfile = new FileWriter(filebasename + ".h");
+		headerfile = new FileWriter(new File(outputDir, "featureselect.h"));
 		headerfile.write(headerContents);
 		} finally {
 			if (headerfile != null) {
@@ -83,7 +84,7 @@ public class CRuntimeFeatureSelection {
 		
 		FileWriter cfile = null;
 		try {
-			cfile = new FileWriter(filebasename + ".c");
+			cfile = new FileWriter(new File(outputDir, "featureselect.c"));
 			cfile.write(cFileContents);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -186,6 +187,4 @@ public class CRuntimeFeatureSelection {
 		
 		cFileContents += res.toString();
 	}
-	
-	
 }

@@ -44,14 +44,12 @@ public class Configuration {
 	
 	public boolean featureAnnotation = false;
 
-	public String getOutputDir() {
+	public File getOutputDir() {
 		String outputDir = equationBaseDirectoryName;
-		if (outputDirectoryName != null)
+		if (outputDirectoryName != null) {
 			outputDir = outputDirectoryName;
-
-		if (outputDir.endsWith(File.separator))
-			outputDir = outputDir.substring(0, outputDir.length()-1);
-		return outputDir;
+		}
+		return new File(outputDir);
 	}
 	
 }
