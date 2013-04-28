@@ -1,15 +1,8 @@
 package composer.rulesets;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
 
 import composer.Configuration;
-import composer.rules.rtcomp.VarEncIntroduction;
-
-import builder.ArtifactBuilderInterface;
-import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
-import metadata.CompositionMetadataStore;
 
 /**
  *
@@ -28,8 +21,6 @@ import metadata.CompositionMetadataStore;
  */
 public abstract class VarEncRuleset extends DefaultRuleset {
 
-	protected CompositionMetadataStore metadataStore;
-	protected File roleFile;
 	protected File cnfFile;
 
 	/**
@@ -41,47 +32,15 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 	@Override
 	public void configure(Configuration conf) {
 		super.configure(conf);
-		metadataStore = CompositionMetadataStore.getInstance();
-		setIntroductionRule(new VarEncIntroduction(metadataStore));
-		roleFile = new File(conf.outputDirectoryName + File.separator + "roles.meta");
 		cnfFile = new File(conf.equationBaseDirectoryName, "model.cnf");
 	}
 
 	/**
-	 * -clear stored metadata
-	 */
-	@Override
-	public void initializeComposition() {
-		super.initializeComposition();
-		metadataStore.clearFeatures();
-	}
-
-	/**
-	 * -save metadata about features
-	 */
-	@Override
-	public void preCompose(ArtifactBuilderInterface builder,
-			List<FSTNonTerminal> features) {
-		super.preCompose(builder, features);
-		for (FSTNonTerminal feature : features) {
-			metadataStore.addFeature(feature.getName());
-		}
-	}
-
-	/**
-	 * -writes metadata about roles to disk
 	 * -triggers generation of the program simulator
 	 */
 	@Override
 	public void finalizeComposition() {
 		super.finalizeComposition();
-
-		try {
-			metadataStore.saveToFile(roleFile);
-		} catch (IOException e) {
-			System.err.println("Error writing roles metadata to `" + roleFile + "` :");
-			e.printStackTrace();
-		}
 		//trigger language specific generation of the program simulator
 		generateSimulator();
 	}
