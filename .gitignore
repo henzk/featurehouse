@@ -2,3 +2,6 @@
 **/bin
 *.*~
 .pydevproject
+.metadata/.lock
+.metadata/.plugins
+.metadata/version.ini
