@@ -112,67 +112,8 @@ public class FSTGenComposer extends FSTGenProcessor {
 			setFstnodes(AbstractFSTParser.fstnodes);
 			compositionRules.finalizeComposition();
 
-			String equationName = new File(conf.equationFileName).getName();
-			equationName = equationName.substring(0, equationName.length() - 4);
-
-			if (conf.featureAnnotation) {
-				File srcDir = new File(conf.getOutputDir(), equationName);
-				saveFeatureAnnotationFile(srcDir);
-				if (conf.lifting && "java".equals(conf.lifting_language.toLowerCase())) {
-					saveSwitchIDAnnotationFile(srcDir);
-				}
-			}
-
 		} catch (FileNotFoundException e1) {
 			//e1.printStackTrace();
-		}
-	}
-
-	private void saveFeatureAnnotationFile(File srcDir) {
-		File f = new File(srcDir+File.separator+"featureHouse"+File.separator, "FeatureAnnotation.java");
-		f.getParentFile().mkdirs();
-		System.out.println("writing FeatureAnnotation to file " +  f.getAbsolutePath());
-		try (FileWriter fw = new FileWriter(f)) {
-			String contents =
-				"package featureHouse;\n"+
-				"import java.lang.annotation.ElementType;\n" +
-				"import java.lang.annotation.Retention;\n" +
-				"import java.lang.annotation.RetentionPolicy;\n" +
-				"import java.lang.annotation.Target;\n" +
-	
-				"@Retention(RetentionPolicy.RUNTIME)\n" +
-				"@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})\n" +
-				"public @interface FeatureAnnotation {\n" +
-				"	String name();\n" +
-				"}";
-			fw.write(contents);
-		} catch (IOException e) {
-			System.err.println("Could not write FeatureAnnotation.java " + e.getMessage());
-		}
-	}
-
-	private void saveSwitchIDAnnotationFile(File srcDir) {
-		File f = new File(srcDir+File.separator+"featureHouse"+File.separator, "FeatureSwitchID.java");
-		f.getParentFile().mkdirs();
-		System.out.println("writing FeatureSwitchID to file " +  f.getAbsolutePath());
-		try (FileWriter fw = new FileWriter(f)) {
-			String contents =
-				"package featureHouse;\n"+
-				"import java.lang.annotation.ElementType;\n" +
-				"import java.lang.annotation.Retention;\n" +
-				"import java.lang.annotation.RetentionPolicy;\n" +
-				"import java.lang.annotation.Target;\n" +
-	
-				"@Retention(RetentionPolicy.RUNTIME)\n" +
-				"@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})\n" +
-				"public @interface FeatureSwitchID {\n" +
-				"	int id();\n" +
-				"	String thenFeature();\n" +
-				"	String elseFeature();\n" +
-				"}";
-			fw.write(contents);
-		} catch (IOException e) {
-			System.err.println("Could not write FeatureSwitchID.java " + e.getMessage());
 		}
 	}
 
@@ -196,23 +137,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		}
 		return composed;
 	}
-	private void addAnnotationToChildrenMethods(FSTNode current,
-			String featureName) {
-		if (current instanceof FSTNonTerminal) {
-			for (FSTNode child : ((FSTNonTerminal)current).getChildren())
-				addAnnotationToChildrenMethods(child, featureName);
-		} else if (current instanceof FSTTerminal) {
-			if ("MethodDecl".equals(current.getType()) || 
-					"ConstructorDecl".equals(current.getType())) {
-				String body = ((FSTTerminal)current).getBody();
-				((FSTTerminal)current).setBody(JavaMethodOverriding.featureAnnotationPrefix + featureName +"\")\n" + body);
-			}
-		} else {
-			throw new RuntimeException("Somebody has introduced a subclass of FSTNode \"" + 
-				current.getClass().getName() 
-				+ "\" that is not considered by the annotation option.");
-		}
-	}
+
 
 	public FSTNode compose(FSTNode nodeA, FSTNode nodeB) {
 		return compose(nodeA, nodeB, null);
@@ -257,19 +182,6 @@ public class FSTGenComposer extends FSTGenProcessor {
 						FSTNode newChildA = compositionRules.getIntroductionRule()
 								.introduce(childA, null, nonterminalComp);
 
-						if (conf.featureAnnotation) {
-							if (newChildA instanceof FSTNonTerminal) {
-								addAnnotationToChildrenMethods(newChildA, JavaMethodOverriding.getFeatureName(childA));
-							} else if (newChildA instanceof FSTTerminal) {
-								if ("MethodDecl".equals(newChildA.getType()) ||
-										"ConstructorDecl".equals(newChildA.getType())) {
-									FSTTerminal termNewChildA = (FSTTerminal) newChildA;
-									String body = termNewChildA.getBody();
-									String feature = JavaMethodOverriding.getFeatureName(childA);
-									termNewChildA.setBody(JavaMethodOverriding.featureAnnotationPrefix + feature +"\")\n" + body);
-								}
-							}
-						}
 						nonterminalComp.addChild(newChildA);
 					}
 				}
