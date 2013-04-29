@@ -21,7 +21,7 @@ public class Introduction implements IntroductionRule {
 	 */
 	@Override
 	public FSTNode introduce(FSTNode a, FSTNode b, FSTNonTerminal compParent) {
-		FSTNode result = (a != null) ? a : b;
+		FSTNode result = (a != null) ? a.getDeepClone() : b.getDeepClone();
 		metadataStore.discoverFuncIntroductions(result);
 		return result;
 	}

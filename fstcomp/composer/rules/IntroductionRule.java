@@ -15,6 +15,10 @@ public interface IntroductionRule {
 	 * of the composition; if `left` is `null`, then `right` is introduced by the
 	 * feature that is currently processed by the composer.
 	 *
+	 * Note: The composer passes in the original instances for a and b.
+	 * Implementing introduction rules must return a new instance that is then
+	 * introduced by the composer. In the simple case getDeepClone may be used for that.
+	 *
 	 * @param a introduced node if not null
 	 * @param b introduced node if not null
 	 * @param compParent parent of introduced node

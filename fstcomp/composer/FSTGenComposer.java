@@ -242,7 +242,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 						// no compatible child, FST-node only in B
 
 						FSTNode newChildB = compositionRules.getIntroductionRule()
-								.introduce(null, childB.getDeepClone(), nonterminalComp);
+								.introduce(null, childB, nonterminalComp);
 
 						nonterminalComp.addChild(newChildB);
 					} else {
@@ -255,7 +255,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 					if (childB == null) {
 						// no compatible child, FST-node only in A
 						FSTNode newChildA = compositionRules.getIntroductionRule()
-								.introduce(childA.getDeepClone(), null, nonterminalComp);
+								.introduce(childA, null, nonterminalComp);
 
 						if (conf.featureAnnotation) {
 							if (newChildA instanceof FSTNonTerminal) {
