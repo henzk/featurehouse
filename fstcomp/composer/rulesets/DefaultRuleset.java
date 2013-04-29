@@ -7,7 +7,6 @@ import java.util.List;
 import builder.ArtifactBuilderInterface;
 
 import metadata.CompositionMetadataStore;
-import composer.CompositionRuleset;
 import composer.Configuration;
 import composer.rules.CSharpMethodOverriding;
 import composer.rules.CompositionError;
@@ -22,7 +21,7 @@ import composer.rules.Replacement;
 import composer.rules.StringConcatenation;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
 
-public class DefaultRuleset extends CompositionRuleset {
+public class DefaultRuleset extends AbstractCompositionRuleset {
 
 	/**
 	 * stores metadata about the composition process
