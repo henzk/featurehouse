@@ -16,6 +16,7 @@ import composer.rules.CompositionRule;
 import composer.rules.JavaMethodOverriding;
 import composer.rules.rtcomp.java.JavaRuntimeFunctionRefinement;
 import composer.rulesets.CVarEncRuleset;
+import composer.rulesets.CounterRuleset;
 import composer.rulesets.DefaultRuleset;
 import composer.rulesets.JavaVarEncRuleset;
 
@@ -64,6 +65,9 @@ public class FSTGenComposer extends FSTGenProcessor {
 			//default rules
 			compositionRules = new DefaultRuleset();
 		}
+		if (conf.isCount) {
+			compositionRules = new CounterRuleset(compositionRules);
+		}
 	}
 	
 	public void run() {
@@ -87,15 +91,6 @@ public class FSTGenComposer extends FSTGenProcessor {
 			
 			for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
 				LinkedList<FSTNonTerminal> features = builder.getFeatures();
-
-				if(conf.isCount && (builder instanceof JavaBuilder || builder instanceof CApproxBuilder)) {
-					Counter counter = new Counter();
-					for (FSTNonTerminal feature : features) {
-						counter.collect(feature);
-					}
-					if(features.size() > 0)
-						counter.writeFile(new File(conf.equationFileName + ".rsf"));
-				}
 
 				compositionRules.preCompose(builder, features);
 
