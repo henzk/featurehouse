@@ -1,26 +1,19 @@
 package composer;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import builder.ArtifactBuilderInterface;
-import builder.capprox.CApproxBuilder;
-import builder.java.JavaBuilder;
 
 import composer.rules.CompositionRule;
-import composer.rules.JavaMethodOverriding;
-import composer.rules.rtcomp.java.JavaRuntimeFunctionRefinement;
 import composer.rulesets.CVarEncRuleset;
 import composer.rulesets.CounterRuleset;
 import composer.rulesets.DefaultRuleset;
+import composer.rulesets.FeatureAnnotationRuleset;
 import composer.rulesets.JavaVarEncRuleset;
 
-import counter.Counter;
 import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
 import de.ovgu.cide.fstgen.ast.FSTNode;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
@@ -68,12 +61,12 @@ public class FSTGenComposer extends FSTGenProcessor {
 		if (conf.isCount) {
 			compositionRules = new CounterRuleset(compositionRules);
 		}
+		if (conf.featureAnnotation) {
+			compositionRules = new FeatureAnnotationRuleset(compositionRules);
+		}
 	}
 	
 	public void run() {
-		JavaMethodOverriding.setFeatureAnnotation(conf.featureAnnotation);
-		JavaRuntimeFunctionRefinement.setFeatureAnnotation(conf.featureAnnotation);
-
 		//select the composition rules
 		setupCompositionRuleset();
 		compositionRules.initializeComposition();
@@ -129,9 +122,6 @@ public class FSTGenComposer extends FSTGenProcessor {
 			if (composed != null) {
 				composed = compose(current, composed);
 			} else {
-				if (conf.featureAnnotation) {
-					addAnnotationToChildrenMethods(current, JavaMethodOverriding.getFeatureName(current));
-				}
 				composed = current;
 			}
 		}

@@ -9,7 +9,7 @@ import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
  */
 public class Introduction implements IntroductionRule {
 
-	private CompositionMetadataStore metadataStore;
+	protected CompositionMetadataStore metadataStore;
 
 	public Introduction(CompositionMetadataStore metadataStore) {
 		this.metadataStore = metadataStore;

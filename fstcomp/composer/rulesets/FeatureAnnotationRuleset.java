@@ -3,48 +3,59 @@ package composer.rulesets;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
-import metadata.CompositionMetadataStore;
+import builder.ArtifactBuilderInterface;
 
 import composer.CompositionRuleset;
+import composer.Configuration;
+import composer.rules.CompositionRule;
+import composer.rules.FeatureAnnotatingIntroduction;
 import composer.rules.Introduction;
+import composer.rules.IntroductionRule;
 import composer.rules.JavaMethodOverriding;
-import de.ovgu.cide.fstgen.ast.FSTNode;
+import composer.rules.rtcomp.java.JavaRuntimeFunctionRefinement;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
-import de.ovgu.cide.fstgen.ast.FSTTerminal;
 
 public class FeatureAnnotationRuleset extends CompositionRulesetWrapper {
 
-	private class FeatureAnnotatingIntroduction extends Introduction {
+	FeatureAnnotatingIntroduction introductionRule;
 
-		public FeatureAnnotatingIntroduction(
-				CompositionMetadataStore metadataStore) {
-			super(metadataStore);
-		}
-
-		@Override
-		public FSTNode introduce(FSTNode childA, FSTNode childB, FSTNonTerminal compParent) {
-			FSTNode result = super.introduce(childA, childB, compParent);
-			if (childA != null && childB == null) {
-				FSTNode newChildA = childA.getDeepClone();
-				if (newChildA instanceof FSTNonTerminal) {
-					addAnnotationToChildrenMethods(newChildA, JavaMethodOverriding.getFeatureName(childA));
-				} else if (newChildA instanceof FSTTerminal) {
-					if ("MethodDecl".equals(newChildA.getType()) ||
-							"ConstructorDecl".equals(newChildA.getType())) {
-						FSTTerminal termNewChildA = (FSTTerminal) newChildA;
-						String body = termNewChildA.getBody();
-						String feature = JavaMethodOverriding.getFeatureName(childA);
-						termNewChildA.setBody(JavaMethodOverriding.featureAnnotationPrefix + feature +"\")\n" + body);
-					}
-				}
-			}
-			return result;
-		}
-	}
-	
 	public FeatureAnnotationRuleset(CompositionRuleset wrappee) {
 		super(wrappee);
+	}
+
+	@Override
+	public void configure(Configuration conf) {
+		super.configure(conf);
+		IntroductionRule wrappedIntroductionRule = wrappee.getIntroductionRule();
+		if (!(wrappedIntroductionRule instanceof Introduction)) {
+			throw new RuntimeException("FeatureAnnotationRuleset needs to wrap a CompositionRuleset " +
+					"with an IntroductionRule that inherits from composer.rules.Introduction");
+		}
+		introductionRule = new FeatureAnnotatingIntroduction((Introduction) wrappedIntroductionRule);
+
+		//one of the following Rules must be used for "JavaMethodOverriding";otherwise feature annotations will not work
+		JavaMethodOverriding.setFeatureAnnotation(conf.featureAnnotation);
+		JavaRuntimeFunctionRefinement.setFeatureAnnotation(conf.featureAnnotation);
+
+		//verify that valid rule is used for "JavaMethodOverriding"
+		CompositionRule rule = getRule(JavaMethodOverriding.COMPOSITION_RULE_NAME);
+		if (!(rule instanceof JavaMethodOverriding) ||
+				!(rule instanceof JavaRuntimeFunctionRefinement)) {
+			throw new RuntimeException("FeatureAnnotationRuleset needs to wrap a CompositionRuleset " +
+					"that uses either JavaMethodOverriding or JavaRuntimeFunctionRefinement to function correctly!");
+		}
+	}
+
+	@Override
+	public void preCompose(ArtifactBuilderInterface builder,
+			List<FSTNonTerminal> features) {
+		super.preCompose(builder, features);
+		if (features.size() > 0) {
+			FSTNonTerminal first = features.get(0);
+			introductionRule.addAnnotationToChildrenMethods(first, JavaMethodOverriding.getFeatureName(first));
+		}
 	}
 
 	@Override
@@ -105,24 +116,6 @@ public class FeatureAnnotationRuleset extends CompositionRulesetWrapper {
 			fw.write(contents);
 		} catch (IOException e) {
 			System.err.println("Could not write FeatureSwitchID.java " + e.getMessage());
-		}
-	}
-
-	private void addAnnotationToChildrenMethods(FSTNode current,
-			String featureName) {
-		if (current instanceof FSTNonTerminal) {
-			for (FSTNode child : ((FSTNonTerminal)current).getChildren())
-				addAnnotationToChildrenMethods(child, featureName);
-		} else if (current instanceof FSTTerminal) {
-			if ("MethodDecl".equals(current.getType()) || 
-					"ConstructorDecl".equals(current.getType())) {
-				String body = ((FSTTerminal)current).getBody();
-				((FSTTerminal)current).setBody(JavaMethodOverriding.featureAnnotationPrefix + featureName +"\")\n" + body);
-			}
-		} else {
-			throw new RuntimeException("Somebody has introduced a subclass of FSTNode \"" + 
-				current.getClass().getName() 
-				+ "\" that is not considered by the annotation option.");
 		}
 	}
 }
