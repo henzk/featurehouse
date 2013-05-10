@@ -79,7 +79,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 				e1.printStackTrace();
 			}
 
-			featureVisitor.setWorkingDir(conf.getOutputDir());
+			featureVisitor.setWorkingDir(conf.getOutputDir().getAbsolutePath());
 			featureVisitor.setExpressionName(conf.equationFileName);
 			
 			for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
