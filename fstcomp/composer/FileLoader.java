@@ -85,10 +85,8 @@ public class FileLoader {
 			throws FileNotFoundException, ParseException {
 		parseEquationFile(equationFileName, equationBaseDirectoryName, aheadEquation, null);
 	}
-	
-	private void parseEquationFile(String equationFileName,
-			String equationBaseDirectoryName, boolean aheadEquation, String[] features)
-			throws FileNotFoundException, ParseException {
+
+	public String[] getFeaturesFromEquationFile(String equationFileName) throws FileNotFoundException {
 		if (equationFileName == null || equationFileName.length() == 0)
 			throw new FileNotFoundException();
 		File equationFile = new File(equationFileName);
@@ -119,37 +117,48 @@ public class FileLoader {
 				}
 			}
 		}
-		if (!equationFileContent.equals("")) {
-			if (features == null) {
-				features = equationFileContent.split("\\s");
-			}
-			System.out.println("Found the following features:");
-			for (String s : features)
-				System.out.println(s);
+		return equationFileContent.split("\\s");
+	}
+	
+	private void parseEquationFile(String equationFileName,
+			String equationBaseDirectoryName, boolean aheadEquation, String[] features)
+			throws FileNotFoundException, ParseException {
 
-			// if (features.length == 0) {
-			// features = equationFileContent.split(" ");
-			// }
-			// System.out.println("BaseDirectory: " + baseDirectoryName);
-			Iterator<ArtifactBuilderInterface> iterator = builderList
-					.iterator();
-			if (!equationBaseDirectoryName.trim().endsWith(
-					"" + File.separatorChar)) {
-				equationBaseDirectoryName = equationBaseDirectoryName.trim()
-						+ File.separatorChar;
-			}
-			while (iterator.hasNext()) {
-				iterator.next().setBaseDirectoryName(
-						getDirectoryName(new File(equationBaseDirectoryName)));
-			}
-			for (int i = 0; i < features.length; i++) {
-				if (features[i].trim().length() > 0) {
-					File feature = new File(equationBaseDirectoryName
-							+ features[i]);
-					parseDirectory(feature, !aheadEquation);
-				}
-			}
+		if (features == null) {
+			features = getFeaturesFromEquationFile(equationFileName);
 		}
+		System.out.println("Found the following features:");
+		for (String s : features)
+			System.out.println(s);
+
+		parseFeatures(equationBaseDirectoryName, !aheadEquation, features);
+	}
+	
+	public void parseFeatures(String equationBaseDirectoryName,
+			boolean recursive, String[] features) throws FileNotFoundException, ParseException {
+
+		// if (features.length == 0) {
+		// features = equationFileContent.split(" ");
+		// }
+		// System.out.println("BaseDirectory: " + baseDirectoryName);
+		Iterator<ArtifactBuilderInterface> iterator = builderList
+				.iterator();
+		if (!equationBaseDirectoryName.trim().endsWith(
+				"" + File.separatorChar)) {
+			equationBaseDirectoryName = equationBaseDirectoryName.trim()
+					+ File.separatorChar;
+		}
+		while (iterator.hasNext()) {
+			iterator.next().setBaseDirectoryName(
+					getDirectoryName(new File(equationBaseDirectoryName)));
+		}
+		for (int i = 0; i < features.length; i++) {
+			if (features[i].trim().length() > 0) {
+				File feature = new File(equationBaseDirectoryName
+						+ features[i]);
+				parseDirectory(feature, recursive);
+			}
+		}	
 	}
 
 	void parseDirectory(File directory, boolean recursive)
