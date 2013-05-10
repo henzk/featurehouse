@@ -86,9 +86,9 @@ public class FileLoader {
 		parseEquationFile(equationFileName, equationBaseDirectoryName, aheadEquation, null);
 	}
 
-	public String[] getFeaturesFromEquationFile(String equationFileName) throws FileNotFoundException {
+	public String[] getFeaturesFromEquationFile(String equationFileName) throws IOException {
 		if (equationFileName == null || equationFileName.length() == 0)
-			throw new FileNotFoundException();
+			throw new FileNotFoundException("File not found:" + equationFileName);
 		File equationFile = new File(equationFileName);
 
 		String equationFileContent = "";
@@ -103,11 +103,6 @@ public class FileLoader {
 				}
 				line = fileReader.readLine();
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		} finally {
 			if (fileReader != null) {
 				try {
@@ -119,13 +114,18 @@ public class FileLoader {
 		}
 		return equationFileContent.split("\\s");
 	}
-	
+
 	private void parseEquationFile(String equationFileName,
 			String equationBaseDirectoryName, boolean aheadEquation, String[] features)
 			throws FileNotFoundException, ParseException {
 
 		if (features == null) {
-			features = getFeaturesFromEquationFile(equationFileName);
+			try {
+				features = getFeaturesFromEquationFile(equationFileName);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		System.out.println("Found the following features:");
 		for (String s : features)
