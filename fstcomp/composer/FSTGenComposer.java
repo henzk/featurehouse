@@ -168,7 +168,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		composer.run(conf);
 	}
 
-	private FSTNode compose(List<FSTNonTerminal> tl) {
+	protected FSTNode compose(List<FSTNonTerminal> tl) {
 		FSTNode composed = null;
 		for (FSTNode current : tl) {
 			if (composed != null) {

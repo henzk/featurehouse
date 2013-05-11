@@ -1,23 +1,10 @@
 package composer;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 
-import printer.PrintVisitorException;
-import builder.ArtifactBuilderInterface;
-import builder.capprox.CApproxBuilder;
-import builder.java.JavaBuilder;
-
 import composer.rules.CompositionRule;
-import composer.rules.rtcomp.c.CRuntimeFeatureSelection;
-import composer.rules.rtcomp.java.JavaRuntimeFeatureSelection;
 import composer.rulesets.MetaRuleset;
 
-import counter.Counter;
-import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
 import de.ovgu.cide.fstgen.ast.FSTNode;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
 import de.ovgu.cide.fstgen.ast.FSTTerminal;
@@ -48,80 +35,18 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 	}
 
 	private void build(String[] args, String[] featuresArg, boolean compose) {
-		meta.clearFeatures();
-		cmd.parseCmdLineArguments(args);
-		
-		compositionRules = new MetaRuleset();
-		
-		try {
-			try {
-				fileLoader.loadFiles(cmd.equationFileName, cmd.equationBaseDirectoryName, cmd.isAheadEquationFile, featuresArg);
-			} catch (cide.gparser.ParseException e1) {
-				System.out.println("error");
-				fireParseErrorOccured(e1);
-				e1.printStackTrace();
-			}
-			String outputDir = cmd.equationBaseDirectoryName;
-			if (cmd.outputDirectoryName != null)
-				outputDir = cmd.outputDirectoryName;
-
-			if (outputDir.endsWith(File.separator))
-				outputDir = outputDir.substring(0, outputDir.length()-1);
-				
-			featureVisitor.setWorkingDir(outputDir);
-			featureVisitor.setExpressionName(cmd.equationFileName);
-			
-			for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
-				LinkedList<FSTNonTerminal> features = builder.getFeatures();
-
-				if(cmd.isCount && (builder instanceof JavaBuilder || builder instanceof CApproxBuilder)) {
-					Counter counter = new Counter();
-					for (FSTNonTerminal feature : features) {
-						counter.collect(feature);
-					}
-					if(features.size() > 0)
-						counter.writeFile(new File(cmd.equationFileName + ".rsf"));
-				}
-				
-				for (FSTNonTerminal feature : features) {
-					meta.addFeature(feature.getName());
-				}
-				
-				if (compose) {
-					FSTNode composition = composeMeta(features);
-					try {
-						featureVisitor.visit((FSTNonTerminal) composition);
-					} catch (PrintVisitorException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			setFstnodes(AbstractFSTParser.fstnodes);
-			if (!compose) {
-				return;
-			}
-			try {
-				String exp = new File(cmd.equationFileName).getName();
-				exp = exp.substring(0, exp.length() - 4);
-				
-				meta.saveToFile(outputDir + File.separator + "roles.meta");
-				if (cmd.lifting) {
-					File cnfFile = new File(cmd.equationBaseDirectoryName, "model.cnf");
-					System.err.println("cnfFile:" + cnfFile.getAbsolutePath());
-					if (cmd.lifting_language.equals("c")) {
-						new CRuntimeFeatureSelection(meta, cnfFile).saveTo(outputDir + File.separator + "features/featureselect");
-					} else if (cmd.lifting_language.equals("java")) {
-						new JavaRuntimeFeatureSelection(meta, cnfFile).saveTo(outputDir + File.separator);
-					}
-				}
-			} catch (IOException e) {			
-				e.printStackTrace();
-			}
-		} catch (FileNotFoundException e1) {
-		}
+		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
+		conf.compose = compose;
+		run(conf, featuresArg);
 	}
-	
-	private FSTNode composeMeta(List<FSTNonTerminal> tl) {
+
+	@Override
+	protected void setupCompositionRuleset(Configuration conf) {
+		compositionRules = new MetaRuleset();
+	}
+
+	@Override
+	protected FSTNode compose(List<FSTNonTerminal> tl) {
 		FSTNode composed = null;
 		for (FSTNode current : tl) {
 			if (metaproduct) {
