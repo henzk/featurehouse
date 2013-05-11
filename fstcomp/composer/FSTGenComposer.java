@@ -82,6 +82,16 @@ public class FSTGenComposer extends FSTGenProcessor {
 	/**
 	 * run the composer
 	 * 
+	 * @param args command line arguments
+	 */
+	public void run(String[] args) {
+		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
+		run(conf);
+	}
+
+	/**
+	 * run the composer
+	 *
 	 * @param conf specifies how and what to compose(usually set by command line switches)
 	 */
 	public void run(Configuration conf) {
@@ -90,7 +100,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 
 	/**
 	 * run the composer
-	 * 
+	 *
 	 * @param conf specifies how and what to compose(usually set by command line switches)
 	 * @param featureNames if featureNames is null, the list of features to compose is read from the equation file specified in conf.
 	 *    If non-null, the list of features given in featureNames overrides the ones from the equation file.
@@ -163,9 +173,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 	}
 
 	public static void main(String[] args) {
-		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
-		FSTGenComposer composer = new FSTGenComposer();
-		composer.run(conf);
+		new FSTGenComposer().run(args);
 	}
 
 	protected FSTNode compose(List<FSTNonTerminal> tl) {
