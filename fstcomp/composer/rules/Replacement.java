@@ -15,5 +15,5 @@ public class Replacement extends AbstractCompositionRule {
 		
 		// do nothing - the work has already been done in FSTGenComposer
 	}
-	public final static String COMPOSITION_RULE_NAME = FSTTerminal.defaultCompositionMechanism;
+	public final static String COMPOSITION_RULE_NAME = "Replacement";
 }
