@@ -1,6 +1,6 @@
 package composer;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +21,6 @@ import de.ovgu.cide.fstgen.ast.FSTTerminal;
 
 public class FSTGenComposer extends FSTGenProcessor {
 
-	protected Configuration conf;
-	
 	protected CompositionRuleset compositionRules;
 
 	public FSTGenComposer() {
@@ -38,11 +36,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		}
 	}
 
-	public FSTGenComposer(Configuration conf) {
-		this.conf = conf;
-	}
-
-	protected void setupCompositionRuleset() {
+	protected void setupCompositionRuleset(Configuration conf) {
 		//variability encoding uses special rules
 		if (conf.lifting) {
 			if (conf.lifting_language.equals("c")) { 
@@ -65,55 +59,83 @@ public class FSTGenComposer extends FSTGenProcessor {
 			compositionRules = new FeatureAnnotationRuleset(compositionRules);
 		}
 	}
-	
-	public void run() {
+
+	protected void loadFiles(Configuration conf, String[] featureNames) throws IOException {
+		if (featureNames == null) {
+			featureNames = fileLoader.getFeaturesFromEquationFile(conf.equationFileName);
+		}
+		System.out.println("Found the following features:");
+		for (String s : featureNames) {
+			System.out.println(s);
+		}
+		try {
+			fileLoader.parseFeatures(conf.equationBaseDirectoryName, !conf.isAheadEquationFile, featureNames);
+		} catch (cide.gparser.ParseException e1) {
+			System.out.println("error");
+			fireParseErrorOccured(e1);
+			e1.printStackTrace();
+		}
+	}
+
+	/**
+	 * run the composer
+	 * 
+	 * @param conf specifies how and what to compose(usually set by command line switches)
+	 */
+	public void run(Configuration conf) {
+		run(conf, null);
+	}
+
+	/**
+	 * run the composer
+	 * 
+	 * @param conf specifies how and what to compose(usually set by command line switches)
+	 * @param featureNames if featureNames is null, the list of features to compose is read from the equation file specified in conf.
+	 *    If non-null, the list of features given in featureNames overrides the ones from the equation file.
+	 */
+	public void run(Configuration conf, String[] featureNames) {
 		//select the composition rules
-		setupCompositionRuleset();
+		setupCompositionRuleset(conf);
 		compositionRules.initializeComposition();
 		try {
-			try {
-				fileLoader.loadFiles(conf.equationFileName, conf.equationBaseDirectoryName, conf.isAheadEquationFile);
-			} catch (cide.gparser.ParseException e1) {
-				System.out.println("error");
-				fireParseErrorOccured(e1);
-				e1.printStackTrace();
-			}
+			loadFiles(conf, featureNames);
+		} catch (IOException e) {
+			System.err.println("IOException occured while loading files:");
+			e.printStackTrace();
+		}
+		
+		featureVisitor.setWorkingDir(conf.getOutputDir().getAbsolutePath());
+		featureVisitor.setExpressionName(conf.equationFileName);
 
-			featureVisitor.setWorkingDir(conf.getOutputDir().getAbsolutePath());
-			featureVisitor.setExpressionName(conf.equationFileName);
-			
-			for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
-				LinkedList<FSTNonTerminal> features = builder.getFeatures();
+		for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
+			LinkedList<FSTNonTerminal> features = builder.getFeatures();
 
-				compositionRules.preCompose(builder, features);
+			compositionRules.preCompose(builder, features);
 
-				FSTNode composition = compose(features);
+			FSTNode composition = compose(features);
 
-				compositionRules.postCompose(builder, features, composition);
+			compositionRules.postCompose(builder, features, composition);
 //				modify(composition);
 
-				/* 
-				 * hook for general purpose visitors
-				 */
-				 /*	if (null != composition)
-        				for (FSTVisitor visitor: getFSTVisitors()) {
-        				    composition.accept(visitor);
-        				}
-				*/
+			/* 
+			 * hook for general purpose visitors
+			 */
+			 /*	if (null != composition)
+    				for (FSTVisitor visitor: getFSTVisitors()) {
+    				    composition.accept(visitor);
+    				}
+			*/
 
-			}
-			setFstnodes(AbstractFSTParser.fstnodes);
-			compositionRules.finalizeComposition();
-
-		} catch (FileNotFoundException e1) {
-			//e1.printStackTrace();
 		}
+		setFstnodes(AbstractFSTParser.fstnodes);
+		compositionRules.finalizeComposition();
+		
 	}
 
 	public static void main(String[] args) {
 		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
-		FSTGenComposer composer = new FSTGenComposer(conf);
-		composer.run();
+		FSTGenComposer composer = new FSTGenComposer();
+		composer.run(conf);
 	}
 
 	private FSTNode compose(List<FSTNonTerminal> tl) {
