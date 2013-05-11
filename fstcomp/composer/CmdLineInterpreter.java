@@ -140,7 +140,7 @@ public class CmdLineInterpreter {
 			errorOccured = true;
 		}
 
-		CommandLineParameterHelper.setJML(jml);//FIXME
+		CommandLineParameterHelper.setJML(jml);
 
 		if (errorOccured) {
 			printHelp(errorOccured);

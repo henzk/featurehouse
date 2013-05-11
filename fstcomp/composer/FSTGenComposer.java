@@ -14,6 +14,7 @@ import composer.rulesets.CVarEncRuleset;
 import composer.rulesets.CounterRuleset;
 import composer.rulesets.DefaultRuleset;
 import composer.rulesets.FeatureAnnotationRuleset;
+import composer.rulesets.JMLRuleset;
 import composer.rulesets.JavaVarEncRuleset;
 
 import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
@@ -39,21 +40,24 @@ public class FSTGenComposer extends FSTGenProcessor {
 	}
 
 	protected void setupCompositionRuleset(Configuration conf) {
-		//variability encoding uses special rules
+
+		//select relevant composition ruleset
 		if (conf.lifting) {
 			if (conf.lifting_language.equals("c")) { 
 				compositionRules = new CVarEncRuleset();
-								
 			} else if (conf.lifting_language.equals("java")) {
 				compositionRules = new JavaVarEncRuleset();
-					
 			} else {
 				throw new InternalError("lifting language \"" + conf.lifting_language + "\" is not implemented.");
 			}
+		} else if (!conf.contract_style.equals("none")){
+			compositionRules = new JMLRuleset();
 		} else {
-			//default rules
 			compositionRules = new DefaultRuleset();
 		}
+
+		//wrap ruleset if necessary
+
 		if (conf.isCount) {
 			compositionRules = new CounterRuleset(compositionRules);
 		}
