@@ -20,6 +20,8 @@ public class CmdLineInterpreter {
 
 	public static final String INPUT_OPTION_SHOW_FST = "--fst";
 
+	public static final String INPUT_OPTION_NO_COMPOSE = "--no-compose";
+
 	public static final String INPUT_OPTION_FILE_OUTPUT = "--write";
 
 	public static final String INPUT_OPTION_OUTPUT_DIRECTORY = "--output-directory";
@@ -83,6 +85,8 @@ public class CmdLineInterpreter {
 					}
 				} else if (args[i].equals(INPUT_OPTION_COUNT)) {
 					conf.isCount = true;
+				} else if (args[i].equals(INPUT_OPTION_NO_COMPOSE)) {
+					conf.compose = false;
 				} else if (args[i].equals(INPUT_OPTION_FILE_OUTPUT)) {
 					conf.fileOutput = true;
 				} else if (args[i].equals(INPUT_OPTION_SHOW_GUI)) {

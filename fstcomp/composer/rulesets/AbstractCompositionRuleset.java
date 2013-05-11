@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import printer.FeaturePrintVisitor;
-import printer.PrintVisitorException;
 import builder.ArtifactBuilderInterface;
 
 import composer.CompositionRuleset;
@@ -18,25 +16,9 @@ import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
 
 public class AbstractCompositionRuleset implements CompositionRuleset {
 
-	protected FeaturePrintVisitor printVisitor = new FeaturePrintVisitor();
 	protected Configuration conf;
 	private IntroductionRule introductionRule;
 	private Map<String, CompositionRule> rules = new HashMap<String, CompositionRule>();
-	private boolean generateOutput = true;
-
-	public CompositionRuleset enableOutput() {
-		generateOutput = true;
-		return this;
-	}
-
-	public CompositionRuleset disableOutput() {
-		generateOutput = false;
-		return this;
-	}
-
-	public boolean outputEnabled() {
-		return generateOutput;
-	}
 
 	protected void setRule(CompositionRule rule) {
 		rules.put(rule.getRuleName(), rule);
@@ -69,15 +51,7 @@ public class AbstractCompositionRuleset implements CompositionRuleset {
 
 	@Override
 	public void postCompose(ArtifactBuilderInterface builder,
-			List<FSTNonTerminal> features, FSTNode composition) {
-		if (outputEnabled()) {
-			try {
-				printVisitor.visit((FSTNonTerminal) composition);
-			} catch (PrintVisitorException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+			List<FSTNonTerminal> features, FSTNode composition) {}
 	
 	@Override
 	public void finalizeComposition() {}

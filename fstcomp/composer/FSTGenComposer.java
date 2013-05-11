@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import printer.PrintVisitorException;
+
 import builder.ArtifactBuilderInterface;
 
 import composer.rules.CompositionRule;
@@ -94,40 +96,68 @@ public class FSTGenComposer extends FSTGenProcessor {
 	 *    If non-null, the list of features given in featureNames overrides the ones from the equation file.
 	 */
 	public void run(Configuration conf, String[] featureNames) {
-		//select the composition rules
+
+		//select relevant composition ruleset
 		setupCompositionRuleset(conf);
+
+		//invoke initializeComposition hook
 		compositionRules.initializeComposition();
+
+		//prepare parser, read feature equation
 		try {
 			loadFiles(conf, featureNames);
 		} catch (IOException e) {
 			System.err.println("IOException occured while loading files:");
 			e.printStackTrace();
 		}
-		
+
+		//configure output dir
 		featureVisitor.setWorkingDir(conf.getOutputDir().getAbsolutePath());
 		featureVisitor.setExpressionName(conf.equationFileName);
 
+		//iterate over builders
 		for (ArtifactBuilderInterface builder : getArtifactBuilders()) {
+
+			//load FSTs
 			LinkedList<FSTNonTerminal> features = builder.getFeatures();
 
+			//invoke preCompose hook
 			compositionRules.preCompose(builder, features);
 
-			FSTNode composition = compose(features);
+			FSTNode composition = null;
 
+			if (conf.compose) {
+				//compose FSTs
+				composition = compose(features);
+			}
+
+			//invoke postCompose hook (composition may be null)
 			compositionRules.postCompose(builder, features, composition);
-//				modify(composition);
 
+			//TODO Is this still needed?
+//			modify(composition);
 			/* 
 			 * hook for general purpose visitors
 			 */
-			 /*	if (null != composition)
-    				for (FSTVisitor visitor: getFSTVisitors()) {
-    				    composition.accept(visitor);
-    				}
+			/*	if (null != composition)
+				for (FSTVisitor visitor: getFSTVisitors()) {
+				    composition.accept(visitor);
+				}
 			*/
 
+			if (conf.compose) {
+				//write out composed FST
+				try {
+					featureVisitor.visit((FSTNonTerminal) composition);
+				} catch (PrintVisitorException e) {
+					e.printStackTrace();
+				}
+			}
 		}
+
+		//remember result
 		setFstnodes(AbstractFSTParser.fstnodes);
+		//invoke finalizeComposition hook
 		compositionRules.finalizeComposition();
 		
 	}

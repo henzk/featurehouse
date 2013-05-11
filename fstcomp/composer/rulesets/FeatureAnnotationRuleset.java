@@ -61,13 +61,15 @@ public class FeatureAnnotationRuleset extends CompositionRulesetWrapper {
 	@Override
 	public void finalizeComposition() {
 		super.finalizeComposition();
-		String equationName = new File(conf.equationFileName).getName();
-		equationName = equationName.substring(0, equationName.length() - 4);
+		if (conf.compose) {
+			String equationName = new File(conf.equationFileName).getName();
+			equationName = equationName.substring(0, equationName.length() - 4);
 
-		File srcDir = new File(conf.getOutputDir(), equationName);
-		saveFeatureAnnotationFile(srcDir);
-		if (conf.lifting && "java".equals(conf.lifting_language.toLowerCase())) {
-			saveSwitchIDAnnotationFile(srcDir);
+			File srcDir = new File(conf.getOutputDir(), equationName);
+			saveFeatureAnnotationFile(srcDir);
+			if (conf.lifting && "java".equals(conf.lifting_language.toLowerCase())) {
+				saveSwitchIDAnnotationFile(srcDir);
+			}
 		}
 	}
 

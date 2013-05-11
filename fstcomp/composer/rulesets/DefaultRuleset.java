@@ -80,12 +80,13 @@ public class DefaultRuleset extends AbstractCompositionRuleset {
 	@Override
 	public void finalizeComposition() {
 		super.finalizeComposition();
-
-		try {
-			metadataStore.saveToFile(roleFile);
-		} catch (IOException e) {
-			System.err.println("Error writing roles metadata to `" + roleFile + "` :");
-			e.printStackTrace();
+		if (conf.compose) {
+			try {
+				metadataStore.saveToFile(roleFile);
+			} catch (IOException e) {
+				System.err.println("Error writing roles metadata to `" + roleFile + "` :");
+				e.printStackTrace();
+			}
 		}
 	}
 }

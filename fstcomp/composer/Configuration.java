@@ -44,6 +44,8 @@ public class Configuration {
 	
 	public boolean featureAnnotation = false;
 
+	public boolean compose = true;
+
 	public File getOutputDir() {
 		String outputDir = equationBaseDirectoryName;
 		if (outputDirectoryName != null) {

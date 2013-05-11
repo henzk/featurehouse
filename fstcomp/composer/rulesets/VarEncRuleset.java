@@ -42,7 +42,9 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 	public void finalizeComposition() {
 		super.finalizeComposition();
 		//trigger language specific generation of the program simulator
-		generateSimulator();
+		if (conf.compose) {
+			generateSimulator();
+		}
 	}
 
 	/**
