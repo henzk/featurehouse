@@ -111,8 +111,9 @@ public class FSTGenComposer extends FSTGenProcessor {
 	 */
 	public void run(Configuration conf, String[] featureNames) {
 
-		//select relevant composition ruleset
+		//select relevant composition ruleset and configure it
 		setupCompositionRuleset(conf);
+		compositionRules.configure(conf);
 
 		//invoke initializeComposition hook
 		compositionRules.initializeComposition();
