@@ -9,6 +9,7 @@ import printer.PrintVisitorException;
 
 import builder.ArtifactBuilderInterface;
 
+import composer.CmdLineInterpreter.CmdLineException;
 import composer.rules.CompositionRule;
 import composer.rulesets.CVarEncRuleset;
 import composer.rulesets.CounterRuleset;
@@ -89,8 +90,15 @@ public class FSTGenComposer extends FSTGenProcessor {
 	 * @param args command line arguments
 	 */
 	public void run(String[] args) {
-		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
-		run(conf);
+		Configuration conf = null;
+		try {
+			conf = CmdLineInterpreter.parseCmdLineArguments(args);
+		} catch (CmdLineException e) {
+			CmdLineInterpreter.printHelp(e);
+		}
+		if (conf != null) {
+			run(conf);
+		}
 	}
 
 	/**
@@ -111,6 +119,9 @@ public class FSTGenComposer extends FSTGenProcessor {
 	 */
 	public void run(Configuration conf, String[] featureNames) {
 
+		if (conf.verbose) {
+			System.out.print(conf);
+		}
 		//select relevant composition ruleset and configure it
 		setupCompositionRuleset(conf);
 		compositionRules.configure(conf);

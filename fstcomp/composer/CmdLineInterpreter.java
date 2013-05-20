@@ -1,10 +1,24 @@
 package composer;
 
 import java.io.File;
+import java.io.IOException;
 
 import de.ovgu.cide.fstgen.ast.CommandLineParameterHelper;
 
 public class CmdLineInterpreter {
+
+	public static class CmdLineException extends Exception {
+		private static final long serialVersionUID = 1;
+		public CmdLineException() {
+			super();
+		}
+		public CmdLineException(Exception e) {
+			super(e);
+		}
+		public CmdLineException(String message) {
+			super(message);
+		}
+	}
 
 	public static final String INPUT_OPTION_EQUATIONFILE = "--expression";
 
@@ -38,47 +52,45 @@ public class CmdLineInterpreter {
 	
 	public static final String INPUT_OPTION_ANNOTATION = "--featureAnnotationJava";
 
-	public static Configuration parseCmdLineArguments(String[] args) {
+	public static final String INPUT_OPTION_VERBOSE = "--verbose";
+
+	public static Configuration parseCmdLineArguments(String[] args) throws CmdLineException {
 		Configuration conf = new Configuration();
 		boolean jml = false;
-		boolean errorOccured = false;
 		if (args != null && args.length > 0) {
 			for (int i = 0; i < args.length; i++) {
 				if (args[i].equals(INPUT_OPTION_EQUATIONFILE)) {
 					i++;
 					if (i < args.length) {
-						conf.equationFileName = args[i];
-						conf.equationFileName = conf.equationFileName.replace("\\",
-								File.separator);
-						conf.equationFileName = conf.equationFileName.replace("/",
-								File.separator);
+						try {
+							conf.equationFileName = new File(args[i]).getCanonicalPath();
+						} catch (IOException e) {
+							throw new CmdLineException(e);
+						}
 					} else {
-						System.out.println("Error occured option: "
-								+ INPUT_OPTION_EQUATIONFILE);
-						errorOccured = true;
+						throw new CmdLineException("Missing value for " + INPUT_OPTION_EQUATIONFILE + " !");
 					}
 				} else if (args[i].equals(INPUT_OPTION_BASE_DIRECTORY)) {
 					i++;
 					if (i < args.length) {
-						conf.equationBaseDirectoryName = args[i];
-						conf.equationBaseDirectoryName = conf.equationBaseDirectoryName
-								.replace("\\", File.separator);
-						conf.equationBaseDirectoryName = conf.equationBaseDirectoryName
-								.replace("/", File.separator);
-						conf.isBaseDirectoryName = true;
+						try {
+							conf.baseDirectoryName = new File(args[i]).getCanonicalPath();
+						} catch (IOException e) {
+							throw new CmdLineException(e);
+						}
 					} else {
-						System.out.println("Error occured option: "
-								+ INPUT_OPTION_BASE_DIRECTORY);
-						errorOccured = true;
+						throw new CmdLineException("Missing value for " + INPUT_OPTION_BASE_DIRECTORY + " !");
 					}
 				} else if (args[i].equals(INPUT_OPTION_OUTPUT_DIRECTORY)) {
 					i++;
 					if (i < args.length) {
-						conf.outputDirectoryName = args[i];
+						try {
+							conf.baseDirectoryName = new File(args[i]).getCanonicalPath();
+						} catch (IOException e) {
+							throw new CmdLineException(e);
+						}
 					} else {
-						System.out.println("Error occured option: "
-								+ INPUT_OPTION_OUTPUT_DIRECTORY);
-						errorOccured = true;
+						throw new CmdLineException("Missing value for " + INPUT_OPTION_OUTPUT_DIRECTORY + " !");
 					}
 				} else if (args[i].equals(INPUT_OPTION_COUNT)) {
 					conf.isCount = true;
@@ -98,6 +110,8 @@ public class CmdLineInterpreter {
 					conf.isAheadEquationFile = true;
 				} else if (args[i].equals(INPUT_OPTION_ANNOTATION)) {
 					conf.featureAnnotation = true;
+				} else if (args[i].equals(INPUT_OPTION_VERBOSE)) {
+					conf.verbose = true;
 				} else if (args[i].startsWith(INPUT_OPTION_LIFTING)) {
 					conf.lifting = true;
 					conf.lifting_language = args[i]
@@ -105,7 +119,7 @@ public class CmdLineInterpreter {
 							.toLowerCase();
 					if (!(conf.lifting_language.equals("java") || conf.lifting_language
 							.equals("c"))) {
-						throw new IllegalArgumentException(
+						throw new CmdLineException(
 								"Lifting requires a language as parameter (e.g. --liftC or --liftJava)");
 					}
 				} else if (args[i].equals(INPUT_OPTION_RESOLVE_REFERENCES)) {
@@ -113,7 +127,7 @@ public class CmdLineInterpreter {
 							+ INPUT_OPTION_RESOLVE_REFERENCES
 							+ "' is obsolete.");
 				} else if (args[i].equals(INPUT_OPTION_HELP)) {
-					printHelp(false);
+					printHelp(null);
 				} else if (args[i].equals(INPUT_OPTION_CONTRACT_STYLE)) {
 					i++;
 					conf.contract_style=args[i];
@@ -124,20 +138,21 @@ public class CmdLineInterpreter {
 							|| conf.contract_style.equals("contract_overriding")
 							|| conf.contract_style.equals("consecutive_contracting") || conf.contract_style
 								.equals("none"))) {
-						throw new IllegalArgumentException(
+						throw new CmdLineException(
 								"Unknown contract style. Please choose from: plain_contracting, explicit_contracting, consecutive_contracting");
 					}
-				}
-
-				else {
-					errorOccured = true;
+				} else {
+					throw new CmdLineException("Unrecognized argument: " + args[i]);
 				}
 			}
-		} else {
-			errorOccured = true;
 		}
 
 		CommandLineParameterHelper.setJML(jml);
+
+		//equation file is mandatory
+		if (conf.equationFileName == null) {
+			throw new CmdLineException("An equation file needs to be specified using the " + INPUT_OPTION_EQUATIONFILE + " option!");
+		}
 
 		//base directory defaults to the directory of the equation file
 		if (conf.baseDirectoryName == null) {
@@ -150,16 +165,15 @@ public class CmdLineInterpreter {
 			conf.outputDirectoryName = conf.baseDirectoryName;
 		}
 
-		if (errorOccured) {
-			printHelp(errorOccured);
-		}
 		return conf;
 	}
 
-	private static void printHelp(boolean errorOccured) {
-		if (errorOccured) {
-			System.out.println("Incorrect command line parameters!");
+	public static void printHelp(CmdLineException e) {
+		if (e != null) {
+			System.out.println("Incorrect command line parameters:");
+			System.out.println(e.getMessage());
 		}
+		System.out.println();
 		System.out.println("Use `java -jar FeatureHouse.jar "
 				+ INPUT_OPTION_EQUATIONFILE + " <file name> ["
 				+ INPUT_OPTION_BASE_DIRECTORY + " <directory name>]'");

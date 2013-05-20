@@ -2,6 +2,7 @@ package composer;
 
 import java.util.List;
 
+import composer.CmdLineInterpreter.CmdLineException;
 import composer.rules.CompositionRule;
 import composer.rulesets.MetaRuleset;
 
@@ -35,9 +36,16 @@ public class FSTGenComposerExtension extends FSTGenComposer {
 	}
 
 	private void build(String[] args, String[] featuresArg, boolean compose) {
-		Configuration conf = CmdLineInterpreter.parseCmdLineArguments(args);
-		conf.compose = compose;
-		run(conf, featuresArg);
+		Configuration conf = null;
+		try {
+			conf = CmdLineInterpreter.parseCmdLineArguments(args);
+		} catch (CmdLineException e) {
+			CmdLineInterpreter.printHelp(e);
+		}
+		if (conf != null) {
+			conf.compose = compose;
+			run(conf, featuresArg);
+		}
 	}
 
 	@Override
