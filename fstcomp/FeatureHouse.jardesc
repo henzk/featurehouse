@@ -46,6 +46,7 @@
         <file path="/fstcomp/.project"/>
         <javaElement handleIdentifier="=fstcomp/&lt;modification"/>
         <javaElement handleIdentifier="=fstcomp/&lt;composer.rules"/>
+        <javaElement handleIdentifier="=fstcomp/&lt;composer.rulesets"/>
         <javaElement handleIdentifier="=fstcomp/&lt;modification.content.Parseables"/>
         <file path="/fstcomp/FeatureHouse.jardesc"/>
         <javaElement handleIdentifier="=fstcomp/&lt;builder.jcop"/>
