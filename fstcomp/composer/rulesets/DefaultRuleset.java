@@ -40,7 +40,7 @@ public class DefaultRuleset extends AbstractCompositionRuleset {
 	public void configure(Configuration conf) {
 		super.configure(conf);
 		metadataStore = new CompositionMetadataStore();
-		roleFile = new File(conf.getOutputDir(), "roles.meta");
+		roleFile = new File(new File(conf.outputDirectoryName), "roles.meta");
 		setIntroductionRule(new Introduction(metadataStore));
 		setRule(new Replacement());
 		setRule(new JavaMethodOverriding(metadataStore));

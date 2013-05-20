@@ -127,7 +127,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 		}
 
 		//configure output dir
-		featureVisitor.setWorkingDir(conf.getOutputDir().getAbsolutePath());
+		featureVisitor.setWorkingDir(conf.outputDirectoryName);
 		featureVisitor.setExpressionName(conf.equationFileName);
 
 		//iterate over builders

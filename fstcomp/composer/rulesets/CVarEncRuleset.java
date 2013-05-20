@@ -1,5 +1,6 @@
 package composer.rulesets;
 
+import java.io.File;
 import java.io.IOException;
 
 import composer.Configuration;
@@ -17,7 +18,7 @@ public class CVarEncRuleset extends VarEncRuleset {
 	@Override
 	protected void generateSimulator() {
 		try {
-			new CRuntimeFeatureSelection(metadataStore, cnfFile).saveTo(conf.getOutputDir());
+			new CRuntimeFeatureSelection(metadataStore, cnfFile).saveTo(new File(conf.outputDirectoryName));
 		} catch (IOException e) {
 			System.err.println("Error while generating program simulator:");
 			e.printStackTrace();
