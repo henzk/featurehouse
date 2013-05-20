@@ -156,6 +156,9 @@ public class FileLoader {
 			if (features[i].trim().length() > 0) {
 				File feature = new File(equationBaseDirectoryName
 						+ features[i]);
+				if (!feature.isDirectory()) {
+					System.out.println("Feature directory not found: " + feature.getAbsolutePath());
+				}
 				parseDirectory(feature, recursive);
 			}
 		}	
