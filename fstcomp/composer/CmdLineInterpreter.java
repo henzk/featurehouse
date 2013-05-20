@@ -85,7 +85,7 @@ public class CmdLineInterpreter {
 					i++;
 					if (i < args.length) {
 						try {
-							conf.baseDirectoryName = new File(args[i]).getCanonicalPath();
+							conf.outputDirectoryName = new File(args[i]).getCanonicalPath();
 						} catch (IOException e) {
 							throw new CmdLineException(e);
 						}
