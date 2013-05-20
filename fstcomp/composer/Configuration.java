@@ -18,7 +18,7 @@ public class Configuration {
 
 	public String equationFileName;
 
-	public String equationBaseDirectoryName;
+	public String baseDirectoryName;
 
 	public String outputDirectoryName = null;
 

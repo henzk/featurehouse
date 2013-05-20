@@ -32,7 +32,7 @@ public abstract class VarEncRuleset extends DefaultRuleset {
 	@Override
 	public void configure(Configuration conf) {
 		super.configure(conf);
-		cnfFile = new File(conf.equationBaseDirectoryName, "model.cnf");
+		cnfFile = new File(conf.baseDirectoryName, "model.cnf");
 	}
 
 	/**

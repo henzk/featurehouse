@@ -48,9 +48,6 @@ public class CmdLineInterpreter {
 					i++;
 					if (i < args.length) {
 						conf.equationFileName = args[i];
-						if (!conf.isBaseDirectoryName)
-							conf.equationBaseDirectoryName = getDirectoryName(new File(
-									conf.equationFileName)) + File.separator;
 						conf.equationFileName = conf.equationFileName.replace("\\",
 								File.separator);
 						conf.equationFileName = conf.equationFileName.replace("/",
@@ -141,6 +138,17 @@ public class CmdLineInterpreter {
 		}
 
 		CommandLineParameterHelper.setJML(jml);
+
+		//base directory defaults to the directory of the equation file
+		if (conf.baseDirectoryName == null) {
+			conf.baseDirectoryName = getDirectoryName(new File(
+					conf.equationFileName)) + File.separator;
+		}
+
+		//output directory defaults to base directory
+		if (conf.outputDirectoryName == null) {
+			conf.outputDirectoryName = conf.baseDirectoryName;
+		}
 
 		if (errorOccured) {
 			printHelp(errorOccured);

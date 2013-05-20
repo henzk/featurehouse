@@ -75,7 +75,7 @@ public class FSTGenComposer extends FSTGenProcessor {
 			System.out.println(s);
 		}
 		try {
-			fileLoader.parseFeatures(conf.equationBaseDirectoryName, !conf.isAheadEquationFile, featureNames);
+			fileLoader.parseFeatures(conf.baseDirectoryName, !conf.isAheadEquationFile, featureNames);
 		} catch (cide.gparser.ParseException e1) {
 			System.out.println("error");
 			fireParseErrorOccured(e1);
