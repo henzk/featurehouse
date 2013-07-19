@@ -3,7 +3,7 @@ package composer.rules.meta;
 import java.util.List;
 
 import metadata.CompositionMetadataStore;
-
+import composer.CompositionException;
 import composer.FSTGenComposerExtension;
 import composer.rules.JavaMethodOverriding;
 
@@ -34,7 +34,7 @@ public class JavaMethodOverridingMeta extends JavaMethodOverriding {
 	
 	@Override
 	public void compose(FSTTerminal terminalA, FSTTerminal terminalB,
-			FSTTerminal terminalComp, FSTNonTerminal nonterminalParent) {
+			FSTTerminal terminalComp, FSTNonTerminal nonterminalParent) throws CompositionException {
 		super.compose(terminalA, terminalB, terminalComp, nonterminalParent);
 		
 		if (!super.replaceOriginal(terminalA)) {

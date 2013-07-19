@@ -136,10 +136,11 @@ public class CmdLineInterpreter {
 					else if (!(conf.contract_style.equals("plain_contracting")
 							|| conf.contract_style.equals("explicit_contracting")
 							|| conf.contract_style.equals("contract_overriding")
-							|| conf.contract_style.equals("consecutive_contracting") || conf.contract_style
-								.equals("none"))) {
+							|| conf.contract_style.equals("method_based")
+							|| conf.contract_style.equals("consecutive_contracting")
+							|| conf.contract_style.equals("none"))) {
 						throw new CmdLineException(
-								"Unknown contract style. Please choose from: plain_contracting, explicit_contracting, consecutive_contracting");
+								"Unknown contract style. Please choose from: plain_contracting, explicit_contracting, consecutive_contracting, method_based");
 					}
 				} else {
 					throw new CmdLineException("Unrecognized argument: " + args[i]);

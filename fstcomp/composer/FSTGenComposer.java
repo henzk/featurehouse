@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
 import printer.PrintVisitorException;
-
 import builder.ArtifactBuilderInterface;
-
 import composer.CmdLineInterpreter.CmdLineException;
 import composer.rules.CompositionRule;
 import composer.rulesets.CVarEncRuleset;
@@ -17,7 +14,6 @@ import composer.rulesets.DefaultRuleset;
 import composer.rulesets.FeatureAnnotationRuleset;
 import composer.rulesets.JMLRuleset;
 import composer.rulesets.JavaVarEncRuleset;
-
 import de.ovgu.cide.fstgen.ast.AbstractFSTParser;
 import de.ovgu.cide.fstgen.ast.FSTNode;
 import de.ovgu.cide.fstgen.ast.FSTNonTerminal;
@@ -95,6 +91,8 @@ public class FSTGenComposer extends FSTGenProcessor {
 			conf = CmdLineInterpreter.parseCmdLineArguments(args);
 		} catch (CmdLineException e) {
 			CmdLineInterpreter.printHelp(e);
+			//compositionRules.add(new ContractComposition(cmd.contract_style));
+			//compositionRules.add(new ContractKeywordComposition(cmd.contract_style));
 		}
 		if (conf != null) {
 			run(conf);
@@ -266,7 +264,11 @@ public class FSTGenComposer extends FSTGenProcessor {
 
 				if (applicableRule != null) {
 					//apply composition rule
-					applicableRule.compose(terminalA, terminalB, terminalComp, nonterminalParent);
+					try {
+						applicableRule.compose(terminalA, terminalB, terminalComp, nonterminalParent);
+					} catch (CompositionException e) {
+						fireCompositionErrorOccured(e);
+					}
 				} else {
 					System.err
 							.println("Error: don't know how to compose terminals: "
