@@ -110,7 +110,7 @@ FeatureHouse: Automatic, language-independent software composition and merging
   <target name="test-compile" depends="test-compile-fstgen,test-compile-fstcomp">
   </target>
 
-  <target name="test" depends="test-compile,test-fstgen,test-fstcomp">
+  <target name="test" depends="test-compile,test-fstcomp">
   </target>
 
   <target name="clean" description="clean up" >
