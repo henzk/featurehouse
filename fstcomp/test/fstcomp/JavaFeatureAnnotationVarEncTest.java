@@ -24,9 +24,7 @@ public class JavaFeatureAnnotationVarEncTest {
 		String outputDir = "result/fstcomp/output/Java_GPL_GPLComp__FeaAnnVarEnc";
 		
 		compose(expression, outputDir, null, new String[] {"--liftJava", "--featureAnnotationJava"});
-		
-		assertEquals("E9292CBAD6EF0D6E732BE680E2E94F50", Checksum.calculateChecksum(new File(outputDir)));
-		
+
 		Scanner scan = new Scanner(new File("result/fstcomp/output/Java_GPL_GPLComp__FeaAnnVarEnc/GPLComp/GPL/Graph.java"));  
 		scan.useDelimiter("\\Z");  
 		String content = scan.next();
@@ -38,6 +36,12 @@ public class JavaFeatureAnnotationVarEncTest {
 		content = scan.next();
 		
 		System.out.println("## Vertex.java ###" + content + "#####");
+		System.out.flush();
+		
+		
+		assertEquals("E9292CBAD6EF0D6E732BE680E2E94F50", Checksum.calculateChecksum(new File(outputDir)));
+		
+
 	
 	}
 }
