@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 import org.junit.Test;
 
@@ -25,5 +26,18 @@ public class JavaFeatureAnnotationVarEncTest {
 		compose(expression, outputDir, null, new String[] {"--liftJava", "--featureAnnotationJava"});
 		
 		assertEquals("E9292CBAD6EF0D6E732BE680E2E94F50", Checksum.calculateChecksum(new File(outputDir)));
+		
+		Scanner scan = new Scanner(new File("result/fstcomp/output/Java_GPL_GPLComp__FeaAnnVarEnc/GPLComp/GPL/Graph.java"));  
+		scan.useDelimiter("\\Z");  
+		String content = scan.next();
+		
+		System.out.println("## Graph.java ###" + content + "#####");
+		
+		scan = new Scanner(new File("result/fstcomp/output/Java_GPL_GPLComp__FeaAnnVarEnc/GPLComp/GPL/Vertex.java"));  
+		scan.useDelimiter("\\Z");  
+		content = scan.next();
+		
+		System.out.println("## Vertex.java ###" + content + "#####");
+	
 	}
 }
