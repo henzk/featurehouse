@@ -1,2 +1,5 @@
+branches:
+    only:
+        composer_tests_debug
 language: java
 install: ant jar
