@@ -38,7 +38,6 @@ FeatureHouse: Automatic, language-independent software composition and merging
     </jar>
   </target>
 
-
   <target name="test-compile-fstcomp">
     <mkdir dir="${test-dir}" />
     <mkdir dir="${test-dir}/fstcomp-build" />
