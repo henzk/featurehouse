@@ -67,7 +67,7 @@ FeatureHouse: Automatic, language-independent software composition and merging
       <formatter type="plain" />
 
       <batchtest fork="yes" todir="${result-dir}/fstcomp">
-        <formatter type="plain" usefile="false">
+        <formatter type="plain" usefile="false" />
         <fileset dir="${test-dir}/fstcomp-build" >
           <include name="fstcomp/**Test.class" />
         </fileset>
@@ -98,7 +98,7 @@ FeatureHouse: Automatic, language-independent software composition and merging
       <formatter type="plain" />
 
       <batchtest fork="yes" todir="${result-dir}/fstgen">
-        <formatter type="plain" usefile="false">
+        <formatter type="plain" usefile="false" />
         <fileset dir="${test-dir}/fstgen-build" >
           <include name="*Test.class" />
         </fileset>
