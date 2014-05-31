@@ -63,6 +63,7 @@ public class Checksum {
 			toHash += '#' + item + ':' + calculateChecksum(new File(file, item));
 		}
 		toHash += ']';
+		System.out.println(toHash);
 		return calculateChecksum(toHash);
 	}
 
