@@ -1,2 +1,5 @@
+branches:
+  only:
+    composer_tests_fix
 language: java
 install: ant jar
